@@ -1,0 +1,82 @@
+.ui-form-actions , .form-actions{
+	clear: both;
+	background-color: #F5F5F5;
+    border-top: 1px solid #DDDDDD;
+    position:relative;
+    margin-top: 18px;
+    padding: 17px 20px 18px;
+
+    button {
+    	.ui-btn-primary;
+    }
+}
+
+form{
+	padding: 0;
+	margin: 0;
+
+	fieldset{
+		border:none;
+	}
+}
+
+.ui-form {
+	font-size: 13px;
+	color: #555555;
+	position:relative;
+
+	input.form-text ,input.form-password , textarea{
+		position:relative;
+		background-color: #FFFFFF;
+	    border: 1px solid #CCCCCC;
+	    border-radius: 3px 3px 3px 3px;
+	    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+	    font-size: 13px;
+	    height: 18px;
+	    line-height: 18px;
+	    padding: 4px;
+	    //.fn-css3 ();
+
+	    &:focus{
+	    	border-color: rgba(82, 168, 236, 0.8);
+  			outline: 0;
+  			outline: thin dotted \9;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+	    }
+	}
+
+	input.form-checkbox , input.form-radio{
+		width:auto;
+	}
+
+	textarea{
+		height:auto;
+	}
+	.control-group{
+		position: relative;
+		clear:both;
+		padding-bottom: 6px;
+
+		label.checkbox{
+			.fn-ilb ();
+			margin:0 4px;
+			input{
+				margin-right: 4px;
+			}
+		}
+
+		.help-inline{
+			position: absolute;
+			bottom:6px;
+			right:6px;
+			.ui-tips-danger;
+		}
+
+		.tip{
+			color: #777;
+			padding: 4px;
+		}
+
+	}
+	
+}

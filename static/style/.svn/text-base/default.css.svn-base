@@ -1,0 +1,935 @@
+/* reset http://github.com/necolas/normalize.css */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
+}
+audio,
+canvas,
+video {
+  display: inline-block;
+  *display: inline;
+  *zoom: 1;
+}
+audio:not([controls]) {
+  display: none;
+}
+[hidden] {
+  display: none;
+}
+html {
+  font-size: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+}
+body,
+button,
+input,
+select,
+textarea {
+  font-family: sans-serif;
+}
+a:focus {
+  outline: thin dotted;
+}
+a:hover,
+a:active {
+  outline: 0;
+}
+h1 {
+  font-size: 2em;
+}
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+b,
+strong {
+  font-weight: bold;
+}
+blockquote {
+  margin: 1em 40px;
+}
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+q {
+  quotes: none;
+}
+q:before,
+q:after {
+  content: '';
+  content: none;
+}
+small {
+  font-size: 75%;
+}
+dd {
+  margin: 0 0 0 40px;
+}
+nav ul,
+nav ol {
+  list-style: none;
+  list-style-image: none;
+}
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+form {
+  margin: 0;
+}
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+legend {
+  border: 0;
+  *margin-left: -7px;
+}
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+  *vertical-align: middle;
+}
+button,
+input {
+  line-height: normal;
+}
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  -webkit-appearance: button;
+  *overflow: visible;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+input[type="search"] {
+  -webkit-appearance: textfield;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+textarea {
+  overflow: auto;
+  vertical-align: top;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+pre code {
+  display: block;
+  overflow: auto;
+  white-space: pre;
+  word-wrap: normal;
+}
+/* functions */
+.btn {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #333333;
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+  padding: 3px 8px;
+  margin: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #e6e6e6;
+  background: -webkit-linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  background: -moz-linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  background: -ms-linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  background: -o-linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  background: linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  -pie-background: linear-gradient(#ffffff, #ffffff 1px, #e6e6e6);
+  behavior: url("PIE.htc");
+}
+.btn:hover {
+  background: #ffffff;
+  background: -webkit-linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  background: -moz-linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  background: -ms-linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  background: -o-linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  background: linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  -pie-background: linear-gradient(#ffffff, #e6e6e6 1px, #ffffff);
+  behavior: url("PIE.htc");
+}
+.btn-primary {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #0055cc;
+  padding: 3px 8px;
+  margin: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #0055cc;
+  background: -webkit-linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  background: -moz-linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  background: -ms-linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  background: -o-linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  background: linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  -pie-background: linear-gradient(#ffffff, #0088cc 1px, #0055cc);
+  behavior: url("PIE.htc");
+}
+.btn-primary:hover {
+  background: #0088cc;
+  background: -webkit-linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  background: -moz-linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  background: -ms-linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  background: -o-linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  background: linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  -pie-background: linear-gradient(#3388d6, #0055cc 1px, #0088cc);
+  behavior: url("PIE.htc");
+}
+.btn-info {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #2f96b4;
+  padding: 3px 8px;
+  margin: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #2f96b4;
+  background: -webkit-linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  background: -moz-linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  background: -ms-linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  background: -o-linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  background: linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  -pie-background: linear-gradient(#ffffff, #5bc0de 1px, #2f96b4);
+  behavior: url("PIE.htc");
+}
+.btn-info:hover {
+  background: #5bc0de;
+  background: -webkit-linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  background: -moz-linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  background: -ms-linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  background: -o-linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  background: linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  -pie-background: linear-gradient(#67b9d1, #2f96b4 1px, #5bc0de);
+  behavior: url("PIE.htc");
+}
+.btn-success {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #51a351;
+  padding: 3px 8px;
+  margin: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #51a351;
+  background: -webkit-linear-gradient(#ffffff, #62c462 1px, #51a351);
+  background: -moz-linear-gradient(#ffffff, #62c462 1px, #51a351);
+  background: -ms-linear-gradient(#ffffff, #62c462 1px, #51a351);
+  background: -o-linear-gradient(#ffffff, #62c462 1px, #51a351);
+  background: linear-gradient(#ffffff, #62c462 1px, #51a351);
+  -pie-background: linear-gradient(#ffffff, #62c462 1px, #51a351);
+  behavior: url("PIE.htc");
+}
+.btn-success:hover {
+  background: #62c462;
+  background: -webkit-linear-gradient(#79c179, #51a351 1px, #62c462);
+  background: -moz-linear-gradient(#79c179, #51a351 1px, #62c462);
+  background: -ms-linear-gradient(#79c179, #51a351 1px, #62c462);
+  background: -o-linear-gradient(#79c179, #51a351 1px, #62c462);
+  background: linear-gradient(#79c179, #51a351 1px, #62c462);
+  -pie-background: linear-gradient(#79c179, #51a351 1px, #62c462);
+  behavior: url("PIE.htc");
+}
+.btn-warning {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #DF8505;
+  padding: 3px 8px;
+  margin: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #f89406;
+  background: -webkit-linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  background: -moz-linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  background: -ms-linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  background: -o-linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  background: linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  -pie-background: linear-gradient(#ffffff, #fbb450 1px, #f89406);
+  behavior: url("PIE.htc");
+}
+.btn-warning:hover {
+  background: #fbb450;
+  background: -webkit-linear-gradient(#fab450, #f89406 1px, #fbb450);
+  background: -moz-linear-gradient(#fab450, #f89406 1px, #fbb450);
+  background: -ms-linear-gradient(#fab450, #f89406 1px, #fbb450);
+  background: -o-linear-gradient(#fab450, #f89406 1px, #fbb450);
+  background: linear-gradient(#fab450, #f89406 1px, #fbb450);
+  -pie-background: linear-gradient(#fab450, #f89406 1px, #fbb450);
+  behavior: url("PIE.htc");
+}
+.btn-danger {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #bd362f;
+  padding: 3px 8px;
+  font-size: 14px;
+  margin: 2px;
+  line-height: 20px;
+  background: #bd362f;
+  background: -webkit-linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  background: -moz-linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  background: -ms-linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  background: -o-linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  background: linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  -pie-background: linear-gradient(#ffffff, #ee5f5b 1px, #bd362f);
+  behavior: url("PIE.htc");
+}
+.btn-danger:hover {
+  background: #ee5f5b;
+  background: -webkit-linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  background: -moz-linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  background: -ms-linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  background: -o-linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  background: linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  -pie-background: linear-gradient(#da6c67, #bd362f 1px, #ee5f5b);
+  behavior: url("PIE.htc");
+}
+.btn-inverse {
+  white-space: keep-all;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+  width: auto;
+  overflow: visible !ie;
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #222222;
+  padding: 3px 8px;
+  font-size: 14px;
+  margin: 2px;
+  line-height: 20px;
+  background: #222222;
+  background: -webkit-linear-gradient(#ffffff, #555555 1px, #222222);
+  background: -moz-linear-gradient(#ffffff, #555555 1px, #222222);
+  background: -ms-linear-gradient(#ffffff, #555555 1px, #222222);
+  background: -o-linear-gradient(#ffffff, #555555 1px, #222222);
+  background: linear-gradient(#ffffff, #555555 1px, #222222);
+  -pie-background: linear-gradient(#ffffff, #555555 1px, #222222);
+  behavior: url("PIE.htc");
+}
+.btn-inverse:hover {
+  background: #555555;
+  background: -webkit-linear-gradient(#5f5f5f, #222222 1px, #555555);
+  background: -moz-linear-gradient(#5f5f5f, #222222 1px, #555555);
+  background: -ms-linear-gradient(#5f5f5f, #222222 1px, #555555);
+  background: -o-linear-gradient(#5f5f5f, #222222 1px, #555555);
+  background: linear-gradient(#5f5f5f, #222222 1px, #555555);
+  -pie-background: linear-gradient(#5f5f5f, #222222 1px, #555555);
+  behavior: url("PIE.htc");
+}
+.btn-large {
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 3px 14px;
+  line-height: 26px;
+}
+.btn-small {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 2px 7px;
+  line-height: 16px;
+}
+.ui-menu {
+  height: 35px;
+  line-height: 35px;
+  font-size: 15px;
+  border-radius: 6px;
+  margin: 0;
+  padding: 0 6px;
+  border: 1px solid #acacac;
+  box-shadow: 0 0 4px #999;
+  background: #e6e6e6;
+  background: -webkit-linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  background: -moz-linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  background: -ms-linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  background: -o-linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  background: linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  -pie-background: linear-gradient(#efefef, #fefefe 1px, #e6e6e6);
+  behavior: url("PIE.htc");
+}
+.ui-menu li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  float: left;
+}
+.ui-menu li a {
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  overflow: visible !ie;
+  text-decoration: none;
+  color: #666;
+  padding: 0 8px 0 10px;
+  height: 35px;
+  border-right: 1px solid #e6e6e6;
+  background: #fefefe;
+  background: -webkit-linear-gradient(#fefefe, #e6e6e6);
+  background: -moz-linear-gradient(#fefefe, #e6e6e6);
+  background: -ms-linear-gradient(#fefefe, #e6e6e6);
+  background: -o-linear-gradient(#fefefe, #e6e6e6);
+  background: linear-gradient(#fefefe, #e6e6e6);
+  -pie-background: linear-gradient(#fefefe, #e6e6e6);
+  behavior: url("PIE.htc");
+}
+.ui-menu li a:hover {
+  color: #fd971f;
+}
+.ui-menu li a.select {
+  background: #e6e6e6;
+  background: -webkit-linear-gradient(#e6e6e6, #e9e9e9);
+  background: -moz-linear-gradient(#e6e6e6, #e9e9e9);
+  background: -ms-linear-gradient(#e6e6e6, #e9e9e9);
+  background: -o-linear-gradient(#e6e6e6, #e9e9e9);
+  background: linear-gradient(#e6e6e6, #e9e9e9);
+  -pie-background: linear-gradient(#e6e6e6, #e9e9e9);
+  behavior: url("PIE.htc");
+}
+.ui-menu li a.select:hover {
+  color: #666;
+}
+.ui-menu-pills {
+  height: 35px;
+  line-height: 35px;
+  font-size: 15px;
+  margin: 0;
+  padding: 0 6px;
+}
+.ui-menu-pills li {
+  list-style: none;
+  margin: 0;
+  padding: 0 1px;
+  float: left;
+  font-weight: bold;
+}
+.ui-menu-pills li a {
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  overflow: visible !ie;
+  text-decoration: none;
+  color: #666;
+  padding: 0 14px;
+  height: 35px;
+  background: none;
+  border-radius: 6px;
+  behavior: url("PIE.htc");
+}
+.ui-menu-pills li a:hover {
+  color: #fd971f;
+  background: #eeeeee;
+}
+.ui-menu-pills li a.select,
+.ui-menu-pills li a.select:hover {
+  background: #fd971f;
+  color: #fff;
+  border-radius: 6px;
+  behavior: url("PIE.htc");
+}
+.ui-menu-tabs {
+  height: 35px;
+  line-height: 35px;
+  font-size: 15px;
+  margin: 0;
+  padding: 0 6px;
+  border-bottom: 1px solid #999;
+}
+.ui-menu-tabs li {
+  list-style: none;
+  margin: 0;
+  margin-bottom: -1px;
+  padding: 0 1px;
+  float: left;
+  font-weight: bold;
+}
+.ui-menu-tabs li a {
+  display: inline-block;
+  zoom: 1;
+  *display: inline;
+  overflow: visible !ie;
+  text-decoration: none;
+  color: #666;
+  padding: 0 14px;
+  height: 35px;
+  background: none;
+  border-radius: 6px 6px 0 0;
+  behavior: url("PIE.htc");
+}
+.ui-menu-tabs li a:hover {
+  color: #fd971f;
+  background: #eeeeee;
+}
+.ui-menu-tabs li a.select,
+.ui-menu-tabs li a.select:hover {
+  color: #666;
+  background: url(img/bg.jpg);
+  border: 1px solid #999;
+  border-bottom: none;
+  margin-bottom: 0;
+  position: relative;
+  top: 0px;
+}
+.ui-tips-close {
+  float: right;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 20px;
+  line-height: 18px;
+  position: relative;
+  top: -6px;
+  right: -6px;
+  cursor: pointer;
+}
+.ui-tips-close:hover {
+  color: #000;
+}
+.ui-tips {
+  border-radius: 5px;
+  background: #fcf8e3;
+  color: #c09853;
+  border: 1px solid #fbeed5;
+  font-size: 12px;
+  padding: 10px 12px;
+  behavior: url("PIE.htc");
+}
+.ui-tips-success {
+  border-radius: 5px;
+  background: #dff0d8;
+  color: #468847;
+  border: 1px solid #d6e9c6;
+  font-size: 12px;
+  padding: 10px 12px;
+  behavior: url("PIE.htc");
+}
+.ui-tips-danger {
+  border-radius: 5px;
+  background: #f2dede;
+  color: #b94a48;
+  border: 1px solid #eed3d7;
+  font-size: 12px;
+  padding: 10px 12px;
+  behavior: url("PIE.htc");
+}
+.ui-tips-info {
+  border-radius: 5px;
+  background: #d9edf7;
+  color: #3a87ad;
+  border: 1px solid #bce8f1;
+  font-size: 12px;
+  padding: 10px 12px;
+  behavior: url("PIE.htc");
+}
+.ui-progress {
+  border-radius: 4px;
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #dbdada;
+  background: -webkit-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -moz-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -ms-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -o-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  -pie-background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  behavior: url("PIE.htc");
+}
+.ui-progress .ui-progress-bar {
+  height: 18px;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 -1px 0 #666666 inset;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #5bc0de;
+  background: -webkit-linear-gradient(#5bc0de, #339bb9);
+  background: -moz-linear-gradient(#5bc0de, #339bb9);
+  background: -ms-linear-gradient(#5bc0de, #339bb9);
+  background: -o-linear-gradient(#5bc0de, #339bb9);
+  background: linear-gradient(#5bc0de, #339bb9);
+  -pie-background: linear-gradient(#5bc0de, #339bb9);
+  behavior: url("PIE.htc");
+  behavior: url("PIE.htc");
+}
+.ui-progress-success {
+  border-radius: 4px;
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #dbdada;
+  background: -webkit-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -moz-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -ms-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -o-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  -pie-background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  behavior: url("PIE.htc");
+}
+.ui-progress-success .ui-progress-bar {
+  height: 18px;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 -1px 0 #666666 inset;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #62c462;
+  background: -webkit-linear-gradient(#62c462, #57a957);
+  background: -moz-linear-gradient(#62c462, #57a957);
+  background: -ms-linear-gradient(#62c462, #57a957);
+  background: -o-linear-gradient(#62c462, #57a957);
+  background: linear-gradient(#62c462, #57a957);
+  -pie-background: linear-gradient(#62c462, #57a957);
+  behavior: url("PIE.htc");
+  behavior: url("PIE.htc");
+}
+.ui-progress-warning {
+  border-radius: 4px;
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #dbdada;
+  background: -webkit-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -moz-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -ms-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -o-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  -pie-background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  behavior: url("PIE.htc");
+}
+.ui-progress-warning .ui-progress-bar {
+  height: 18px;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 -1px 0 #666666 inset;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #fbb450;
+  background: -webkit-linear-gradient(#fbb450, #f89406);
+  background: -moz-linear-gradient(#fbb450, #f89406);
+  background: -ms-linear-gradient(#fbb450, #f89406);
+  background: -o-linear-gradient(#fbb450, #f89406);
+  background: linear-gradient(#fbb450, #f89406);
+  -pie-background: linear-gradient(#fbb450, #f89406);
+  behavior: url("PIE.htc");
+  behavior: url("PIE.htc");
+}
+.ui-progress-danger {
+  border-radius: 4px;
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #dbdada;
+  background: -webkit-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -moz-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -ms-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: -o-linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  -pie-background: linear-gradient(#c1c1c1, #ececec 2px, #f7f7f7 6px, #f5f5f5 10px, #f2f2f2);
+  behavior: url("PIE.htc");
+}
+.ui-progress-danger .ui-progress-bar {
+  height: 18px;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 -1px 0 #666666 inset;
+  *zoom: 1;
+  *display: inline;
+  height: 18px;
+  background: #ee5f5b;
+  background: -webkit-linear-gradient(#ee5f5b, #c43c35);
+  background: -moz-linear-gradient(#ee5f5b, #c43c35);
+  background: -ms-linear-gradient(#ee5f5b, #c43c35);
+  background: -o-linear-gradient(#ee5f5b, #c43c35);
+  background: linear-gradient(#ee5f5b, #c43c35);
+  -pie-background: linear-gradient(#ee5f5b, #c43c35);
+  behavior: url("PIE.htc");
+  behavior: url("PIE.htc");
+}
+.ui-table {
+  border: 1px solid #9e9e9e;
+  border-radius: 6px;
+  background: #efefef;
+  behavior: url("PIE.htc");
+}
+.ui-table table {
+  width: 100%;
+}
+.ui-table th {
+  height: 40px;
+  line-height: 40px;
+  text-align: left;
+  padding-left: 6px;
+}
+.ui-table td {
+  padding: 6px;
+}
+body {
+  background: url(img/bg.jpg);
+  font: 16px/1.62 '微软雅黑', 'Hiragino Sans GB', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+#main {
+  position: relative;
+  overflow: hidden;
+}
+#header {
+  height: 50px;
+  border-top: 1px solid #777;
+  border-bottom: 1px solid #000;
+  box-shadow: 0 1px 3px #444;
+  z-index: 3;
+  position: relative;
+  overflow: hidden;
+  background: #505153;
+  background: -webkit-linear-gradient(#505153, #363a3d);
+  background: -moz-linear-gradient(#505153, #363a3d);
+  background: -ms-linear-gradient(#505153, #363a3d);
+  background: -o-linear-gradient(#505153, #363a3d);
+  background: linear-gradient(#505153, #363a3d);
+  -pie-background: linear-gradient(#505153, #363a3d);
+  behavior: url("PIE.htc");
+}
+#header h1 {
+  position: absolute;
+  color: #efefef;
+  bottom: 0px;
+  left: 20px;
+  margin: 0;
+  padding: 0;
+  font-size: 30px;
+}
+#header ul {
+  position: absolute;
+  bottom: 0px;
+  right: 8px;
+}
+#header ul li {
+  display: block;
+  float: left;
+}
+#header ul li a {
+  color: #fff;
+  float: left;
+  display: block;
+  margin: 0 5px;
+  text-decoration: none;
+  color: #999;
+}
+#header ul li a.btn-warning {
+  color: #fff;
+}
+#menu {
+  background: url(img/bg_tile.jpg);
+  float: left;
+  width: 200px;
+  z-index: 1;
+  position: relative;
+  overflow: hidden;
+}
+#menu span {
+  position: absolute;
+  bottom: 0px;
+  right: 8px;
+  color: #999;
+  cursor: pointer;
+  font-size: 30px;
+}
+#menu .title {
+  border-bottom: 1px solid #666d76;
+  filter: progid:dximagetransform.microsoft.gradient(enabled='true', startColorstr='#4C000000', endColorstr='#4C000000');
+  background: rgba(0, 0, 0, 0.3);
+  position: relative;
+  height: 35px;
+}
+#menu .title h3 {
+  display: block;
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  border-bottom: 1px solid #3e424b;
+  margin: 0;
+  height: 35px;
+  line-height: 35px;
+  padding: 0 6px;
+  cursor: pointer;
+}
+#menu dl {
+  margin: 0 5px;
+  margin-bottom: 10px;
+  position: relative;
+  *border-top: 1px solid #52555c;
+}
+#menu dl a {
+  display: block;
+  width: 100%;
+  color: #efefef;
+  font-size: 13px;
+  padding: 4px;
+  border-bottom: 1px solid #666d76;
+  text-decoration: none;
+}
+#menu dl a:hover,
+#menu dl a.select {
+  color: #fd971f;
+}
+#menu dt {
+  position: relative;
+  margin: 10px 8px 0 8px;
+  color: #e0e0e0;
+  font-size: 14px;
+  background: url(img/bg_tile.jpg);
+  padding: 0 6px;
+  height: 25px;
+  line-height: 25px;
+  font-weight: bold;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid #333;
+  border-bottom: 1px solid #666d76;
+  box-shadow: 0 -1px 2px #666666;
+  cursor: pointer;
+  behavior: url("PIE.htc");
+}
+#menu dt span {
+  bottom: 3px;
+}
+#menu dd {
+  margin: 0 14px;
+}
+#wrap {
+  position: absolute;
+  z-index: 2;
+  box-shadow: -6px 0 6px #444444;
+  overflow: hidden;
+  background: url(img/bg.jpg);
+  behavior: url("PIE.htc");
+}
+#wrap .loading {
+  position: absolute;
+  z-index: 3;
+  width: 300px;
+  height: 80px;
+  line-height: 80px;
+  box-shadow: 0 2px 6px #444;
+  top: 0;
+  background: url(img/bg.jpg);
+  border-radius: 0 0 6px 6px;
+  padding: 0;
+  text-align: center;
+  display: none;
+  behavior: url("PIE.htc");
+}
+.wrap {
+  padding: 20px;
+}

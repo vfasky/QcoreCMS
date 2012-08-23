@@ -1,0 +1,9 @@
+@import "ui-button.less";
+@import "ui-menu.less";
+@import "ui-tips.less";
+<<<<<<< .mine
+@import "ui-table.less";
+=======
+@import "ui-progress.less";
+
+>>>>>>> .r856

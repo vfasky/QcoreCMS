@@ -1,0 +1,99 @@
+{% extends "./layout.html" %}
+
+{% block body %}
+<div class="ui-panel">
+	<div class="title">
+		<button class="ui-btn act-add" >
+			<i class="icon-plus"></i>
+			添加
+		</button>
+		栏目列表
+	</div>
+	<div class="content">
+		<div class="ui-table-un">
+			<table >
+				<tr>
+					<th>id</th>
+					<th>名称</th>
+					<th>所属模型</th>
+					<th>操作</th>
+				</tr>
+				{% for v in data %}
+				<tr>
+					<td>{{v['value']}}</td>
+					<td>
+						{{v['label']}}
+					</td>
+					<td>{{ v['data']['model']['info'] }}</td>
+					<td>
+
+						<a href="#" data-id="{{v['value']}}" class="ui-btn ui-btn-small act-edit"><i class="icon-pencil"></i> 修改</a>
+
+						<a href="#" data-id="{{v['value']}}" class="ui-btn-danger ui-btn-small act-del"><i class="icon-trash icon-white"></i> 删除</a>
+					</td>
+				</tr>
+				{% end %}
+			</table>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	seajs.use(['jquery','app/admin/table','app/admin/pop'] , function(jQuery, table , pop){
+		var formCfg = {{json_encode(form)}};
+		var list = {{json_encode(data)}};
+
+		//添加
+		jQuery('.act-add').click(function(){
+			pop.form('添加',formCfg);
+			return false;
+		});
+		//编辑
+		jQuery('.act-edit').click(function(){
+			var id = jQuery(this).attr('data-id');
+			jQuery.each(list,function(k,v){
+				if(v.value == id){
+					var value = { 
+						id : v.value ,
+						model_id : v.data.model_id ,
+						parent : v.data['parent'] ,
+					}
+					jQuery.each(v.data['locales'],function(k,l){
+						value['locale_' + l['locale_id'].toString()] = l['title']
+					});
+					pop.form('编辑',formCfg,value,function(data){
+						jQuery.post(window.location.href,data,function(json){
+							if(json.success) return window.location.reload();
+							pop.alert(json.msg);
+						},'json');
+					});
+					return false;
+				}
+			});
+			return false;
+		});
+		//删除
+		jQuery('.act-del').click(function(){
+			var id = jQuery(this).attr('data-id');
+
+			jQuery.each(list,function(k,v){
+				if(v.value == id){
+					pop.conform('确认删除 "' + v.label + '" ? ' , function(){
+						jQuery.post(window.location.href,{ id : v.value , isDel : true } , function(json){
+							if(json.success) return window.location.reload();
+							pop.alert(json.msg);
+						},'json')
+					});			
+					return false;
+				}
+			});
+			return false;
+		});
+		
+
+		table.render();
+	});
+
+	
+</script>
+{% end %}

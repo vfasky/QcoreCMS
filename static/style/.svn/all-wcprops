@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/design/!svn/ver/873/trunk/admin_cp/style
+END
+base.less
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/design/!svn/ver/872/trunk/admin_cp/style/base.less
+END
+ui-tips.less
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/design/!svn/ver/859/trunk/admin_cp/style/ui-tips.less
+END
+ui-panel.less
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/design/!svn/ver/873/trunk/admin_cp/style/ui-panel.less
+END
+ui.less
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/design/!svn/ver/872/trunk/admin_cp/style/ui.less
+END
+ui-menu.less
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/design/!svn/ver/849/trunk/admin_cp/style/ui-menu.less
+END
+ui-progress.less
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/design/!svn/ver/856/trunk/admin_cp/style/ui-progress.less
+END
+ui-icon.less
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/design/!svn/ver/868/trunk/admin_cp/style/ui-icon.less
+END
+default.less
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/design/!svn/ver/872/trunk/admin_cp/style/default.less
+END
+ui-pagination.less
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/design/!svn/ver/872/trunk/admin_cp/style/ui-pagination.less
+END
+PIE.htc
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/design/!svn/ver/831/trunk/admin_cp/style/PIE.htc
+END
+ui-tables.less
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/design/!svn/ver/872/trunk/admin_cp/style/ui-tables.less
+END
+default.css
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/design/!svn/ver/859/trunk/admin_cp/style/default.css
+END
+ui-button.less
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/design/!svn/ver/862/trunk/admin_cp/style/ui-button.less
+END

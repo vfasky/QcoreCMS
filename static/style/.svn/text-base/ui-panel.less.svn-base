@@ -1,0 +1,44 @@
+.ui-panel{
+	box-shadow: 0 0 6px #999;
+	border-radius: 6px;
+	.fn-css3();
+	
+	.title{
+		border: 1px solid @linColor;
+		border-radius: 6px 6px 0 0;
+		height: 50px;
+		line-height: 50px;
+		padding: 0 6px;
+		color: #555;
+		text-shadow: 1px 1px 0 #FFFFFF;
+		.fn-bglg2(#fafafa,#f2f2f2);
+	}
+
+	.content{
+		border: 1px solid @linColor;
+		border-top: none;
+		border-radius: 0 0 6px 6px;
+		background: #fff;
+		padding:0 0 6px 0;
+		.fn-css3();
+
+	}
+
+	.ui-pagination li a{
+		border:1px solid @obgColor;
+		background: #fff;
+
+		&:hover , &.select{
+			background: @bgColor;
+		}
+	}
+
+	.ui-pagination-pager li a{
+		border:1px solid @obgColor;
+		background: #fff;
+
+		&:hover , &.select{
+			background: @bgColor;
+		}
+	}
+}

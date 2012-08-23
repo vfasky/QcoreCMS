@@ -1,0 +1,85 @@
+#coding=utf-8
+
+# 控制器
+import app.controller.default
+import app.controller.admin
+
+# 路由
+routes = [
+    (r"/", app.controller.default.index),
+    (r"/PIE.htc", app.controller.default.PIE),
+
+    (r"/login", app.controller.admin.login),
+    (r"/logout", app.controller.admin.logout),
+
+    (r"/admin", app.controller.admin.index),
+    (r"/admin/content", app.controller.admin.content),
+    (r"/admin/content-add-(\d+)$", app.controller.admin.contentAdd),
+    (r"/admin/content-edit-(\d+)-(\d+)-(\d+)$", app.controller.admin.contentEdit),
+    (r"/admin/content-(\d+)$", app.controller.admin.contentList),
+
+    (r"/admin/role", app.controller.admin.role),
+    (r"/admin/locale", app.controller.admin.locale),
+    (r"/admin/user", app.controller.admin.user),
+
+    (r"/admin/model", app.controller.admin.models),
+    (r"/admin/model-field-(\d+)$", app.controller.admin.model_field),
+
+    (r"/admin/category", app.controller.admin.category),
+
+    (r"/admin/uploadFile", app.controller.admin.uploadFile),
+    
+    (r"/(.+)$", app.controller.default._404),
+]
+
+'''
+访问规则
+=================
+
+特殊标识: 
+
+ - ACL_NO_ROLE 没有角色用户
+ - ACL_HAS_ROLE 有角色用户
+ 
+'''
+acl = {
+    'app.controller.admin.index' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.role' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.locale' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.models' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.model_field' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.category' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.user' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.content' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.contentList' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.contentAdd' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.contentEdit' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.uploadFile' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.logout' : {
+        'allow' : ['ACL_HAS_ROLE']
+    },
+}
