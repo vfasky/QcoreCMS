@@ -110,7 +110,7 @@ class uploadFile(BaseAction):
             'size' : os.path.getsize(filePath) / 1024
         })
 
-        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        #self.set_header("Content-Type", "application/json; charset=UTF-8")
 
         return self.write({ 
             'error': 0 , 

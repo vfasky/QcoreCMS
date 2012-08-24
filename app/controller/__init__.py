@@ -62,9 +62,9 @@ class BaseAction(RequestHandler):
                 chunk = "%s(%s)" % (callback, escape.to_unicode(chunk))
                 self.set_header("Content-Type",
                                 "application/javascript; charset=UTF-8")
-            else:
-                self.set_header("Content-Type",
-                                "application/json; charset=UTF-8")
+            #else:
+                #self.set_header("Content-Type",
+                                #"application/json; charset=UTF-8")
 
         if True == self.settings['is_dev'] : self.set_header("RUN-TIME", str(self.get_run_time()))
         super(RequestHandler, self).write(chunk)
