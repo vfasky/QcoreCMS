@@ -81,7 +81,7 @@ import app.uimodules
 
 # 设置
 settings = {
-    'debug': True,
+    'debug': %s,
     'gzip': True,
     'cookie_secret' : 'Qcms-by-fms',
     #'xsrf_cookies' : True,
@@ -113,6 +113,7 @@ application = tornado.web.Application(config.routes,**settings)
 application.listen(%s)
 tornado.ioloop.IOLoop.instance().start()
 ''' % (
+	isDev ,
 	isDev ,
 	version ,
 	host ,
