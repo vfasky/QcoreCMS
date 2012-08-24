@@ -12,6 +12,7 @@ class index(BaseAction):
 
     @YooYo.acl
     def get(self):
+        
         self.render('admin/index.html')
 
 class logout(BaseAction):
@@ -74,12 +75,12 @@ class login(BaseAction):
         return self.write({'success' : False , 'msg' : '邮箱或密码错误'})
 
 class uploadFile(BaseAction):
+    """上传文件"""
 
     @YooYo.acl
     def get(self):
         return
 
-    """上传文件"""
     @YooYo.acl
     def post(self):
         if not self.request.files.has_key('fileData'):
@@ -109,8 +110,6 @@ class uploadFile(BaseAction):
             'type' : fileData['content_type'] ,
             'size' : os.path.getsize(filePath) / 1024
         })
-
-        #self.set_header("Content-Type", "application/json; charset=UTF-8")
 
         return self.write({ 
             'error': 0 , 

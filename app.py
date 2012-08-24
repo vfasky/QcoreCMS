@@ -37,7 +37,7 @@ settings = {
     'is_dev' : True , 
     'session' : {
     	'left_time' : 3600 * 24 ,
-    	'storage' : 'Memory'
+    	'storage' : 'MySql'
     },
     'acl' : config.acl ,
     'login_url' : '/login',
