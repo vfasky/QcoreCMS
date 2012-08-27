@@ -66,7 +66,7 @@ class BaseAction(RequestHandler):
                 #self.set_header("Content-Type",
                                 #"application/json; charset=UTF-8")
 
-        if True == self.settings['is_dev'] : self.set_header("RUN-TIME", str(self.get_run_time()))
+        if True == self.settings['run_mode'] == 'devel' : self.set_header("RUN-TIME", str(self.get_run_time()))
         super(RequestHandler, self).write(chunk)
 
 

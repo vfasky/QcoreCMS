@@ -8,60 +8,27 @@ if code != 'utf8':
 	reload(sys)
 	sys.setdefaultencoding('utf8')
 
-# 添加类搜索路径
-app_path = os.path.dirname(__file__)
-sys.path.append( os.path.join(app_path, 'app/module/') )
 
+import config
 import tornado.ioloop
 import tornado.database
 import tornado.web
 
-import YooYo.session
-import app.config as config
-
 from YooYo.db.mySql import Database
 
-# ui_modules
-import app.uimodules
+# 添加类搜索路径
+sys.path.append( os.path.join(config.app_path, 'app/module/') )
 
-# 设置
-settings = {
-    'debug': True,
-    'gzip': True,
-    'cookie_secret' : 'Qcms-by-fms',
-    #'xsrf_cookies' : True,
-    'static_path' : os.path.join(app_path, 'static'),
-    'upload_path' : 'file',
-    'template_path' : os.path.join(app_path, 'app/view'),
-    'autoescape' : None ,
-    'is_dev' : True , 
-    'session' : {
-    	'left_time' : 3600 * 24 ,
-    	'storage' : 'MySql'
-    },
-    'acl' : config.acl ,
-    'login_url' : '/login',
-    'version' : '1.0.0-dev' ,
-    'ui_modules' : app.uimodules,
-}
+# 连接数据库
+database = config.settings['database'][ config.settings['run_mode'] ]
+Database.addConnect(tornado.database.Connection(
+    host = database['host'],
+    database = database['database'] ,
+    user = database['user'] ,
+    password = database['password']
+))
 
-# 配置数据库连接
-if settings['is_dev']:
-	Database.addConnect(tornado.database.Connection(
-				host = '127.0.0.1:3306' ,
-				database = 'qcms' ,
-				user = 'root' ,
-				password = '' 
-			))
-else:
-	Database.addConnect(tornado.database.Connection(
-				host = '127.0.0.1:3306' ,
-				database = 'qcms' ,
-				user = 'root' ,
-				password = '' 
-			))
-
-application = tornado.web.Application(config.routes,**settings)
-
-application.listen(8889)
+# run app
+application = tornado.web.Application(config.routes,**config.settings)
+application.listen(config.settings['port'])
 tornado.ioloop.IOLoop.instance().start()

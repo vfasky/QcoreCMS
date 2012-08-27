@@ -1,8 +1,12 @@
 #coding=utf-8
+import os
 
 # 控制器
 import app.controller.default
 import app.controller.admin
+
+# ui_modules
+import app.uimodules
 
 # 路由
 routes = [
@@ -82,4 +86,43 @@ acl = {
     'app.controller.admin.logout' : {
         'allow' : ['ACL_HAS_ROLE']
     },
+}
+
+# 项目根目录
+app_path = os.path.dirname(__file__)
+
+# 程序配置
+settings = {
+    'debug': True,
+    'gzip': True,
+    'cookie_secret' : 'Qcms-by-fms',
+    #'xsrf_cookies' : True,
+    'static_path' : os.path.join(app_path, 'static'),
+    'upload_path' : 'file',
+    'template_path' : os.path.join(app_path, 'app/view'),
+    'autoescape' : None ,
+    'run_mode' : 'devel' , #行模式有: devel、test 、deploy  三种
+    'database' : {
+        'devel' : {
+            'host' : '127.0.0.1:3306' ,
+            'database' : 'qcms' ,
+            'user' : 'root' ,
+            'password' : ''
+        },
+        'deploy' : {
+            'host' : '127.0.0.1:3306' ,
+            'database' : 'qcms' ,
+            'user' : 'root' ,
+            'password' : ''
+        }
+    },
+    'session' : {
+        'left_time' : 3600 * 24 ,
+        'storage' : 'MySql'
+    },
+    'acl' : acl ,
+    'login_url' : '/login',
+    'version' : '1.0.0-dev' ,
+    'ui_modules' : app.uimodules,
+    'port' : 8889
 }

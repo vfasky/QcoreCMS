@@ -9,7 +9,8 @@ setup(
     description = ("基于 tornado 的 cms"),
     install_requires = [
         'tornado',
-        'MySQL-python'
+        'MySQL-python',
+        'PIL'
         ],
     platforms='any',
     license = "",
