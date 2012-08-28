@@ -152,6 +152,7 @@ settings = {
     'debug': %s,
     'gzip': True,
     'cookie_secret' : 'Qcms-by-fms',
+    'app_path' : app_path,
     'static_path' : os.path.join(app_path, 'static'),
     'upload_path' : 'file',
     'template_path' : os.path.join(app_path, 'app/view'),

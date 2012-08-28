@@ -6,6 +6,17 @@ import YooYo.form
 from YooYo.db.mySql import Database as mysql
 from tornado import escape
 
+
+class Plugin(YooYo.mvc.Model.Base):
+    """插件表"""
+    # 表名
+    table = 'qc_plugin'
+    # 主键
+    primaryKey = 'id'
+
+    def __init__(self):
+        YooYo.mvc.Model.Base.__init__(self)
+
 class CategoryHasArticle(YooYo.mvc.Model.Base):
     """栏目关联文章表"""
     # 表名
