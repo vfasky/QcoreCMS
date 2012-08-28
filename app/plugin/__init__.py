@@ -1,107 +1,176 @@
 #coding=utf-8
-import os
+import tornado.web
+import functools
+import app.model as model
 import YooYo.util as util
-class UIModule:
-    """ui model 的扩展"""
+import YooYo.db.mySql
+import sys
+import YooYo.form
 
-    basePath = os.path.join( os.path.dirname(__file__) , 'ui' )
+# 存放插件列表
+_list = False
+# 在工作的插件
+_work = False
+# 插件的配置
+_config = False
 
-    def __init__(self,model,*args, **kwargs):
-        self._css = []
-        self._js = []
-        self._cssFile = []
-        self._jsFile = []
-        self._head = []
-        self._body = []
-        self._bind = []
-        self._model = model
-        self._args = args
-        self._kwargs = kwargs
+# 取插件列表
+def getList():
+    global _list
+    if False == _list:
+        reloadList()
+    return list
 
-    # 添加css
-    def addCss(self,string):
-        self._css.append(string)
-        return self
+# 重载插件列表
+def reloadList():
+    global _list
+    _list = {}
 
-    # 添加css文件
-    def addCssFile(self,path):
-        self._cssFile.append(path)
-        return self
+# 取在工作的插件
+def getWork():
+    global _work
+    if False == _work:
+        _work = []
+        data = model.Plugin().find().select('name').get(500)
+        for v in data:
+            _work.append(v['name'])
+    return _work
 
-    # 添加js
-    def addJs(self,string):
-        self._js.append(string)
-        return self
+# 取配置
+def getConfig(plugin):
+    global _config
+    if plugin not in getWork() :
+        return {}
 
-    # 添加js文件
-    def addJsFile(self,path):
-        self._jsFile.append(path)
-        return self
+    if False == _config:
+        _config = {}
+        data = model.Plugin().find().self('name,config').get(500)
+        for v in data:
+            _config[v['name']] = util.json.decode(v['config'])
 
-    # 在 head 插入代码
-    def addHead(self,string):
-        self._head.append(string)
-        return self
+    return _config.get(plugin,{})
 
-    # 在 body 插入代码
-    def addBody(self,string):
-        self._body.append(string)
-        return self
+# 设置配置
+def setConfig(plugin,config):
+    global _config
+    if plugin not in getWork() :
+        return False
 
-    def htmlHead(self):
-        head = ''.join(self._head)
+    model.Plugin().find('name = ?',plugin).save({
+        'config' : util.json.encode(config)
+    })
 
-        if len(self._css) > 0 :
-            head = head + '<style type="text/css">%s</style>' % ''.join(self._css) 
- 
-        css = []
-        for link in self._cssFile :
-            css.append('<link href="%s" rel="stylesheet" type="text/css" media="screen" />' % link)
+    if _config.get(plugin,False) :
+        _config[plugin] = config
 
-        head = head + ''.join(css)
+# 安装插件
+def install(plugin):
+    if plugin in getWork() :
+        return False
+    pluginObj = getInstantiate(plugin)
+    if pluginObj:
+        desc = pluginObj.__desc__
 
-        js = []
-        for path in self._jsFile:
-            js.append('<script src="%s" type="text/javascript"></script>' % path)
+# 取插件实例
+def getInstantiate(plugin):
+    try:
+        pluginName = 'app.plugin.' + plugin 
+        __import__( pluginName )
+
+        if hasattr(sys.modules[pluginName] , plugin):
+            return getattr( sys.modules[pluginName] , plugin)()
+    except Exception, e:
+        return False
 
 
-        head = head + ''.join(js)
+class base:
+    """插件基类"""
 
-        return head
+    event = ['beforeExecute','afterExecute','beforeRender']
 
+    def __init__(self):
+        self.model = model
+        self.mysql = YooYo.db.mySql
+        self.form  = YooYo.form
+        # 绑定的事件
+        self.event = []
 
-    def htmlBody(self):
-        body = ''.join(self._body)
+    # 表单定义
+    def form(self):
+        return False
 
-        if len(self._js) > 0 :
-            body = body + '<script type="text/javascript">%s</script>' % "\r\n".join(self._js)
+    # 安装时执行
+    def onInstall(self):
+        return None
 
-        return body
+    # 卸载时执行
+    def onUninstall(self):
+        return None
 
-    # 执行
-    def execute(self,action,html=False):
-        if hasattr(self,action):
-            if False != html:
-                return getattr(self,action)(html)
-
-            ret = getattr(self,action)()
-            if False == ret :
-                return False
-
-            return {
-                'self' : self._model ,
-                'args' : self._args ,
-                'kwargs' : self._kwargs
-            }
-
-    
-    # 绑定 UIModel
-    def bind(self,name,action,event='before'):
-        self._bind.append({
-            'name' : name ,
-            'event' : event ,
-            'action' : action ,
-            'plugin' : self.__class__.__name__
-        })
-        return self
+    '''
+    绑定事件,支持的事件有:
+     - beforeExecute 执行控制器动作之前调用
+     - afterExecute 执行控制器动作之后调用
+     - beforeRender 渲染之前调用
+    ''' 
+    def bind(target,event,action):
+        if hasattr(self,action) and event in base.event:
+            self.event.append({
+                'target' : target ,
+                'event' : event ,
+                'action' : action
+            })
         
+
+
+
+class UIModule(tornado.web.UIModule):
+    '''
+    UIModule 插件
+    '''
+        
+    def __init__(self, handler):
+        tornado.web.UIModule.__init__(self, handler)
+
+    def static_url(self,url):
+        return '/plugin/%s/static/%s' % ( self.__class__.__name__ , url )
+
+
+class controller:
+    '''
+    controller 插件
+    '''
+
+    # 执行控制器动作之前调用
+    @staticmethod
+    def beforeExecute(method):
+
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+            return method(self, *args, **kwargs)
+
+        return wrapper
+
+    # 执行控制器动作之后调用
+    @staticmethod
+    def afterExecute(method):
+
+        @functools.wraps(method)
+        def wrapper(self, chunk=None):
+            thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+            return method(self, chunk)
+
+        return wrapper
+
+    # 渲染之前调用
+    @staticmethod
+    def beforeRender(method):
+
+        @functools.wraps(method)
+        def wrapper(self, template_name, **kwargs):
+            thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+            return method(self, template_name, **kwargs)
+
+
+        return wrapper

@@ -1,11 +1,10 @@
 #coding=utf-8
-import YooYo.mvc.Action
-import YooYo.util
-import YooYo.db.mySql
+
 import time
 import os
 import re
-import tornado.locale
+import YooYo.db.mySql
+import app.plugin
 from tornado import escape
 from YooYo.mvc.Action import RequestHandler
 
@@ -54,6 +53,14 @@ class BaseAction(RequestHandler):
     def is_ajax(self):
         return "XMLHttpRequest" == self.request.headers.get("X-Requested-With")
 
+    @app.plugin.controller.beforeRender
+    def render(self, template_name, **kwargs):
+        super(RequestHandler, self).render(template_name, **kwargs)
+
+    @app.plugin.controller.afterExecute
+    def finish(self, chunk=None):
+        super(RequestHandler, self).finish(chunk)
+
     def write(self, chunk):
         if isinstance(chunk, dict):
             chunk = escape.json_encode(chunk)
@@ -62,9 +69,6 @@ class BaseAction(RequestHandler):
                 chunk = "%s(%s)" % (callback, escape.to_unicode(chunk))
                 self.set_header("Content-Type",
                                 "application/javascript; charset=UTF-8")
-            #else:
-                #self.set_header("Content-Type",
-                                #"application/json; charset=UTF-8")
 
         if True == self.settings['run_mode'] == 'devel' : self.set_header("RUN-TIME", str(self.get_run_time()))
         super(RequestHandler, self).write(chunk)

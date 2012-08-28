@@ -5,18 +5,19 @@ import YooYo
 import YooYo.form 
 import YooYo.util as util
 import app.model as model
+import app.plugin
 import os 
 
 
 class index(BaseAction):
-
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
-        
+
         self.render('admin/index.html')
 
 class logout(BaseAction):
-
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
         self.session.clear()
@@ -43,9 +44,11 @@ class login(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     def get(self):
         self.render('admin/login.html',form=self.form().getConfig())
 
+    @app.plugin.controller.beforeExecute
     def post(self):
         import time
         time.sleep(1.5)
@@ -74,13 +77,76 @@ class login(BaseAction):
 
         return self.write({'success' : False , 'msg' : '邮箱或密码错误'})
 
+class plugin(BaseAction):
+    '''插件管理'''
+
+    # 取插件列表
+    def getPlugins(self):
+        path = os.path.join(self.settings['app_path'] , 'app/plugin')
+        init = str( os.path.join( path , '__init__.py') )
+        key  = init.split( '__init__.py' )
+
+        import glob
+        list = glob.glob( os.path.join( path , '*.py') )
+
+        plugins = []
+        for name in list:
+            name = str(name)
+            if init != name:
+                plugins.append( name.replace( key[0] , '' ).replace('.py' , '') )
+
+        for name in os.listdir(path):
+            if os.path.isdir( os.path.join(path,name) ) :
+                plugins.append(name)
+        return plugins
+
+    @app.plugin.controller.beforeExecute
+    @YooYo.acl
+    def get(self):
+        # 已激活的插件
+        wordList = app.plugin.getWork()
+        # 所有插件列表
+        allList = self.getPlugins()
+        # 可用插件
+        pluginList = []
+        for p in allList:
+            if p not in wordList:
+                pluginList.append(p)
+
+        words = []
+        for w in wordList:
+            pluginObj = app.plugin.getInstantiate(w)
+            words.append({
+                'name' : w ,
+                'form' : w.form(),
+                'info' : pluginObj.__class__.__doc__
+            })
+
+        plugins = []
+        for p in pluginList:
+
+            plugins.append({
+                'name' : p ,
+                'info' : app.plugin.getInstantiate(p).__class__.__doc__
+            })
+
+        self.render('admin/plgin.html',
+                    plugins=plugins,
+                    words=words)
+
+
+
+
+
 class uploadFile(BaseAction):
     """上传文件"""
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
         return
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self):
         if not self.request.files.has_key('fileData'):
@@ -130,6 +196,7 @@ class contentEdit(BaseAction):
             label = '保存' 
         ))
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self,id,aid,cid):
         category = model.Category().get(id)
@@ -143,9 +210,11 @@ class contentEdit(BaseAction):
                         locales=locales,
                         category=category,
                         data=data,
+                        editor='editor_base',
                         aid=aid,
                         form=form.getConfig())
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self,id,aid,cid):
         category = model.Category().get(id)
@@ -194,7 +263,7 @@ class contentAdd(BaseAction):
             label = '添加' 
         ))
 
-
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self,id):
 
@@ -205,9 +274,11 @@ class contentAdd(BaseAction):
             self.render('admin/content_save.html',
                         locales=locales,
                         category=category,
+                        editor='editor_base',
                         aid=False,
                         form=form.getConfig())
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self,id):
         category = model.Category().get(id)
@@ -242,6 +313,7 @@ class contentAdd(BaseAction):
 class contentList(BaseAction):
     '''内容列表'''
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self,id):
         ar = model.Category().getModel(id)
@@ -268,7 +340,9 @@ class contentList(BaseAction):
                     pagination=ar.getPagination(),
                     data=data)
 
+
     # 删除文章
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self,id):
         ar = model.Category().getModel(id)
@@ -283,6 +357,7 @@ class contentList(BaseAction):
 class content(BaseAction):
     '''内容管理'''
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
         categoryAr = model.Category()
@@ -332,6 +407,7 @@ class user(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
         ar = model.User().find()\
@@ -353,6 +429,7 @@ class user(BaseAction):
                     form=self.form().getConfig(),
                     pagination=ar.getPagination())
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self):
         ar = model.User()
@@ -426,13 +503,15 @@ class category(BaseAction):
             label = '保存' 
         ))
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
         ar = model.Category()
         data = ar.treeToSelect()
        
         self.render('admin/category.html',data=data,form=self.form().getConfig())
-        
+       
+    @app.plugin.controller.beforeExecute 
     @YooYo.acl
     def post(self):
         ar = model.Category()
@@ -535,6 +614,7 @@ class model_field(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self,id):
         data = model.Model().get(id)
@@ -549,7 +629,8 @@ class model_field(BaseAction):
             'success' : False ,
             'msg' : element.label() + ':' + msg
         })
-    
+   
+    @app.plugin.controller.beforeExecute 
     @YooYo.acl
     def post(self,id):
         ar = model.ModelData()
@@ -603,12 +684,14 @@ class models(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):       
        
         data = model.Model().find().order('id ASC').get(10)
         self.render('admin/model.html' , data=data , form=self.form().getConfig())
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self):
         form = self.form()
@@ -660,12 +743,14 @@ class locale(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):       
 
         data = model.Locale().find().order('id ASC').get(10)
         self.render('admin/locale.html' , data=data , form=self.form().getConfig())
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self):
         form = self.form()
@@ -712,13 +797,14 @@ class role(BaseAction):
         ))
         return form
 
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):       
 
         role = model.Role().find().order('id ASC').get(10)
         self.render('admin/role.html' , role=role , form=self.form().getConfig())
 
-
+    @app.plugin.controller.beforeExecute
     @YooYo.acl
     def post(self):
         form = self.form()

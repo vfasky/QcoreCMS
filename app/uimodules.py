@@ -4,68 +4,64 @@ __author__ = 'vfasky'
 import tornado.web
 import Image
 import os
-import app.model as model
-import app.plugin
+import sys
 
-class UIModule(tornado.web.UIModule):
-    plugins = False
+class plugin(tornado.web.UIModule):
+    """UIModule 扩展"""
 
     def __init__(self, handler):
         tornado.web.UIModule.__init__(self, handler)
-        self._head = []
-        self._body = []
+        self._plugin = False
+
+
+    def embedded_javascript(self):
+        if self._plugin :
+            return self._plugin.embedded_javascript()
+        return None
+
+    def javascript_files(self):
+        if self._plugin :
+            return self._plugin.javascript_files()
+        return None
+
+    def embedded_css(self):
+        if self._plugin :
+            return self._plugin.embedded_css()
+        return None
+
+    def css_files(self):
+        if self._plugin :
+            return self._plugin.css_files()
+        return None
 
     def html_head(self):
-        return ''.join(self._head)
+        if self._plugin :
+            return self._plugin.html_head()
+        return None
 
     def html_body(self):
-        return ''.join(self._body)
-    
-    def render(self, *args, **kwargs):
-        if False == UIModule.plugins:
-            UIModule.plugins = model.Plugin().find('type = ?' , 'UIModule').get(500)
+        if self._plugin :
+            return self._plugin.html_body()
+        return None
 
-        name = self.__class__.__name__
+    def render(self, plugin, *args, **kwargs):
+        plugin = str(plugin).strip()
 
-        # 渲染之前执行
-        for plugin in UIModule.plugins:
-            if plugin['name'] == name \
-            and plugin['event'] == 'before' \
-            and hasattr(app.plugin.UIModule,plugin['plugin']) :
-
-                plug = getattr(app.plugin.UIModule,plugin['plugin'])(self, *args, **kwargs)
-                ret = plug.execute(plugin['action'])
-
-                self._head.append(plug.htmlHead())
-                self._body.append(plug.htmlBody())
-
-                if False == ret:
-                    return False
-
-                self = ret['self']
-                args = ret['args']
-                kwargs = ret['kwargs']
-
-        ret = self.execute(*args, **kwargs)
-
-        # 渲染之后执行
-        for plugin in UIModule.plugins:
-            if plugin['name'] == name \
-            and plugin['event'] == 'after' \
-            and hasattr(app.plugin.UIModule,plugin['plugin']) :
-
-                plug = getattr(app.plugin.UIModule,plugin['plugin'])(self, *args, **kwargs)
-                ret = plug.execute(plugin['action'],ret)
-
-                self._head.append(plug.htmlHead())
-                self._body.append(plug.htmlBody())
-
-        return ret
-
+        pluginName = 'app.plugin.' + plugin + '.uimodel'
+        try:
+            __import__( pluginName )
+            if hasattr(sys.modules[pluginName] , plugin):
+                pluginObj = getattr( sys.modules[pluginName] , plugin)(self.handler)
+                self._plugin = pluginObj
+                return pluginObj.render(*args, **kwargs)
+            else:
+                return None
+        except Exception, e:
+            return None
         
-
-
-class thumbnail(UIModule):
+        
+        
+class thumbnail(tornado.web.UIModule):
     '''
     动态生成缩略图
     =============
@@ -79,7 +75,7 @@ class thumbnail(UIModule):
         return fileInfo[ len(fileInfo) - 1 ]
 
 
-    def execute(self, url, width=100, height=100, default='/static/none.png'):
+    def render(self, url, width=100, height=100, default='/static/none.png'):
        
         imgPath = os.path.join(self.handler.settings['app_path'] , '.' + url)
         thumbnailName = '_tb_' + str(width) + '_' + str(height) + '.' + self.getExt(url)

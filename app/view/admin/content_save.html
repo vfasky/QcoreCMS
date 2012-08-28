@@ -1,9 +1,5 @@
 {% extends "./layout.html" %}
-{% block head %}
-<link rel="stylesheet" href="{{ static_url("js/editor/kind/themes/default/default.css")}}">
-<script charset="utf-8" src="{{ static_url("js/editor/kind/kindeditor-min.js")}}"></script>
-<script charset="utf-8" src="{{ static_url("js/editor/kind/lang/zh_CN.js")}}"></script>
-{% end %}
+
 {% block body %}
 <div class="ui-panel">
 	
@@ -20,7 +16,7 @@
 </div>
 
 <script type="text/javascript">
-	seajs.use(['jquery','YooYo/form' , 'app/admin/pop' , 'json' , 'app/admin/formPlugin'],function(jQuery,Form,pop,JSON,formPlugin){
+	seajs.use(['jquery','YooYo/form' , 'app/admin/pop' , 'json' ],function(jQuery,Form,pop,JSON){
 		var formCfg = {{json_encode(form)}};
 		var forms = [];
 		{% if aid %}
@@ -84,10 +80,8 @@
 
 			
 				//绑定编辑器插件
-				form.plugin('Editor', formPlugin.editorPlugin);
-				form.plugin('ImageUpload',formPlugin.imageUploadPlugin);
-				form.plugin('Photos',formPlugin.photosPlugin);
-				form.plugin('Videos',formPlugin.vidoesPlugin);
+				{% module plugin(editor) %}
+				
 
 				forms[forms.length] = form;
 

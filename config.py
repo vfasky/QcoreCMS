@@ -12,6 +12,7 @@ import app.uimodules
 routes = [
     (r"/", app.controller.default.index),
     (r"/PIE.htc", app.controller.default.PIE),
+    (r"/plugin/(\w+)/static/([a-zA-Z_./-0-9]+)$", app.controller.default.plugin),
 
     (r"/login", app.controller.admin.login),
     (r"/logout", app.controller.admin.logout),
@@ -25,6 +26,7 @@ routes = [
     (r"/admin/role", app.controller.admin.role),
     (r"/admin/locale", app.controller.admin.locale),
     (r"/admin/user", app.controller.admin.user),
+    (r"/admin/plugin", app.controller.admin.plugin),
 
     (r"/admin/model", app.controller.admin.models),
     (r"/admin/model-field-(\d+)$", app.controller.admin.model_field),
@@ -81,6 +83,9 @@ acl = {
         'allow' : ['admin']
     },
     'app.controller.admin.uploadFile' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.plugin' : {
         'allow' : ['admin']
     },
     'app.controller.admin.logout' : {

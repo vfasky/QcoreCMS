@@ -1,0 +1,78 @@
+{% extends "./layout.html" %}
+
+{% block body %}
+{% if len(words) > 0 %}
+<div class="ui-panel">
+	<div class="title">
+		激活的插件
+	</div>
+	<div class="content">
+		<div class="ui-table-un">
+			<table >
+				<tr>
+					<th>名称</th>
+					<th>描述</th>
+					<th>操作</th>
+				</tr>
+				{% for v in words %}
+				<tr>
+					<td>{{v['name']}}</td>
+					<td>{{v['info']}}</td>
+					
+					<td>
+						{% if v['form'] %}
+						<a href="#" data-name="{{v['name']}}" class="ui-btn ui-btn-small act-edit"><i class="icon-pencil"></i> 配置</a>
+						{% end %}
+						<a href="#" data-name="{{v['name']}}" class="ui-btn-danger ui-btn-small act-del"><i class="icon-off icon-white"></i> 禁用</a>
+					</td>
+				</tr>
+				{% end %}
+			</table>
+		</div>
+	</div>
+</div>
+
+<br/>
+{% end %}
+
+<div class="ui-panel">
+	<div class="title">
+		可用的插件
+	</div>
+	<div class="content">
+		<div class="ui-table-un">
+			<table >
+				<tr>
+					<th>名称</th>
+					<th>描述</th>
+					<th>操作</th>
+				</tr>
+				{% for v in plugins %}
+				<tr>
+					<td>{{v['name']}}</td>
+					<td>{{v['info']}}</td>
+					
+					<td>
+						
+						<a href="#" data-name="{{v['name']}}" class="ui-btn ui-btn-small act-edit"><i class="icon-ok"></i> 激活</a>
+						
+					</td>
+				</tr>
+				{% end %}
+			</table>
+		</div>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+	seajs.use(['jquery','app/admin/table','app/admin/pop'] , function(jQuery, table , pop){
+		
+		
+
+		table.render();
+	});
+
+	
+</script>
+{% end %}

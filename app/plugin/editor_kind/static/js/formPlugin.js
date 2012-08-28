@@ -1,7 +1,7 @@
 define(function(require, exports, module) {
 	var jQuery = require('jquery');
 	var JSON   = require('json');
-	var pop    = require('./pop');
+	var pop    = require('app/admin/pop');
 
 	//视频列表
 	exports.vidoesPlugin = function(e){
@@ -306,5 +306,17 @@ define(function(require, exports, module) {
 			}
 			editor.html(val);
 		};
+	};
+
+	exports.init = function(form){
+		var time = setInterval(function(){
+			if(window['KindEditor']){
+				clearInterval(time);
+				form.plugin('Editor', exports.editorPlugin);
+				form.plugin('ImageUpload',exports.imageUploadPlugin);
+				form.plugin('Photos',exports.photosPlugin);
+				form.plugin('Videos',exports.vidoesPlugin);
+			}
+		},100);
 	};
 });
