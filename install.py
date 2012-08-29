@@ -64,10 +64,11 @@ import app.controller.admin
 # ui_modules
 import app.uimodules
 
-# 路由规则
+# 路由
 routes = [
     (r"/", app.controller.default.index),
     (r"/PIE.htc", app.controller.default.PIE),
+    (r"/plugin/(\w+)/static/([a-zA-Z_./-0-9]+)$", app.controller.default.pluginStatic),
 
     (r"/login", app.controller.admin.login),
     (r"/logout", app.controller.admin.logout),
@@ -81,6 +82,7 @@ routes = [
     (r"/admin/role", app.controller.admin.role),
     (r"/admin/locale", app.controller.admin.locale),
     (r"/admin/user", app.controller.admin.user),
+    (r"/admin/plugin", app.controller.admin.plugin),
 
     (r"/admin/model", app.controller.admin.models),
     (r"/admin/model-field-(\d+)$", app.controller.admin.model_field),
@@ -92,7 +94,7 @@ routes = [
     (r"/(.+)$", app.controller.default._404),
 ]
 
-\'\'\'
+'''
 访问规则
 =================
 
@@ -101,7 +103,7 @@ routes = [
  - ACL_NO_ROLE 没有角色用户
  - ACL_HAS_ROLE 有角色用户
  
-\'\'\'
+'''
 acl = {
     'app.controller.admin.index' : {
         'allow' : ['admin']
@@ -137,6 +139,9 @@ acl = {
         'allow' : ['admin']
     },
     'app.controller.admin.uploadFile' : {
+        'allow' : ['admin']
+    },
+    'app.controller.admin.plugin' : {
         'allow' : ['admin']
     },
     'app.controller.admin.logout' : {

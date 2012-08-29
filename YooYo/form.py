@@ -357,6 +357,13 @@ class Form:
             elif YooYo.util.validators.isNumber(e._name) and data.has_key(int(e._name)):
                 e.setValue(data[int(e._name)])
 
+    # 取表单默认值(注:值未经过验证)
+    def getDefaultValues(self):
+        values = {}
+        for e in self._elements: 
+            values[e._name] = e.getValue()
+        return values
+
     # 验证数据
     def validate(self,data):
         _data = {}

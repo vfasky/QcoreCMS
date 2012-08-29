@@ -18,13 +18,52 @@ _config = False
 def getList():
     global _list
     if False == _list:
-        reloadList()
-    return list
+        '''
+        结构:
+        _list = {
+            'event' : {
+                'controller' : [
+                    {'plugin' , 'action'},
+                    ...
+                ]
+            } ,
+            ...
+        '''
+        _list = {
+            'beforeExecute' : {} ,
+            'afterExecute' : {} ,
+            'beforeRender' : {} ,
+        }
+        data = model.Plugin().find().select('name,bind').get(500)
+        
+        for v in data:
+            'target event action'
+            binds = util.json.decode(v['bind'])
+    
+            for bind in binds:
 
-# 重载插件列表
-def reloadList():
+                eventList = _list[bind['event']]
+                if False == eventList.get(bind['target'] , False) :
+                    eventList[bind['target']] = []
+
+                eventList[bind['target']].append({
+                    'plugin' : v['name'] ,
+                    'action' : bind['action']
+                })
+
+                _list[bind['event']] = eventList
+
+
+    return _list
+
+# 重载插件缓存
+def reload():
     global _list
-    _list = {}
+    global _work
+    global _config
+    _list = False
+    _work = False
+    _config = False
 
 # 取在工作的插件
 def getWork():
@@ -69,7 +108,37 @@ def install(plugin):
         return False
     pluginObj = getInstantiate(plugin)
     if pluginObj:
-        desc = pluginObj.__desc__
+        name = plugin
+        config = '{}'
+
+        pluginObj.onInstall()
+
+        if pluginObj.form() :
+            config = pluginObj.form().getDefaultValues()
+
+        bind = pluginObj._bind
+        id = model.Plugin().find().add({
+            'name' : name ,
+            'config' : util.json.encode(config) ,
+            'bind' : util.json.encode(bind)
+        })
+        if id :
+            reload()
+            return True
+
+    return False
+
+# 卸载插件
+def uninstall(plugin):
+    if plugin not in getWork() :
+        return False
+    pluginObj = getInstantiate(plugin)
+    if pluginObj:
+        pluginObj.onUninstall()
+        model.Plugin().find('name = ?' , plugin).delete()
+        reload()
+        return True
+    return False
 
 # 取插件实例
 def getInstantiate(plugin):
@@ -89,11 +158,13 @@ class base:
     event = ['beforeExecute','afterExecute','beforeRender']
 
     def __init__(self):
-        self.model = model
-        self.mysql = YooYo.db.mySql
-        self.form  = YooYo.form
+        self._model = model
+        self._mysql = YooYo.db.mySql
+        self._form  = YooYo.form
         # 绑定的事件
-        self.event = []
+        self._bind = []
+        # 上下文
+        self._context = {}
 
     # 表单定义
     def form(self):
@@ -113,9 +184,9 @@ class base:
      - afterExecute 执行控制器动作之后调用
      - beforeRender 渲染之前调用
     ''' 
-    def bind(target,event,action):
+    def bind(self,target,event,action):
         if hasattr(self,action) and event in base.event:
-            self.event.append({
+            self._bind.append({
                 'target' : target ,
                 'event' : event ,
                 'action' : action
@@ -148,6 +219,28 @@ class controller:
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+       
+            eventList = getList()['beforeExecute']
+            thatPlugins = eventList.get(thisAction,False)
+            if thatPlugins:
+
+                for info in thatPlugins:
+                    pluginObj = getInstantiate(info['plugin'])
+                    # 执行插件
+                    if pluginObj:
+                        pluginObj._context['args'] = args
+                        pluginObj._context['self'] = self
+                        pluginObj._context['kwargs'] = kwargs
+                      
+
+                        if False == getattr(pluginObj,info['action'])():
+                        
+                            return False
+
+                        self = pluginObj._context['self']
+                        args = pluginObj._context['args'] 
+                        kwargs = pluginObj._context['kwargs']    
+
             return method(self, *args, **kwargs)
 
         return wrapper
@@ -159,6 +252,25 @@ class controller:
         @functools.wraps(method)
         def wrapper(self, chunk=None):
             thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+            
+            eventList = getList()['afterExecute']
+            thatPlugins = eventList.get(thisAction,False)
+            if thatPlugins:
+                for info in thatPlugins:
+                    pluginObj = getInstantiate(info['plugin'])
+                    # 执行插件
+                    if pluginObj:
+                
+                        pluginObj._context['self'] = self
+                        pluginObj._context['chunk'] = chunk
+                 
+                        if False == getattr(pluginObj,info['action'])():
+                        
+                            return False
+
+                        self = pluginObj._context['self']
+                        chunk = pluginObj._context['chunk']
+                  
             return method(self, chunk)
 
         return wrapper
@@ -170,6 +282,27 @@ class controller:
         @functools.wraps(method)
         def wrapper(self, template_name, **kwargs):
             thisAction = self.__class__.__module__ + '.' + self.__class__.__name__
+            
+            eventList = getList()['beforeRender']
+            thatPlugins = eventList.get(thisAction,False)
+            if thatPlugins:
+                for info in thatPlugins:
+                    pluginObj = getInstantiate(info['plugin'])
+                    # 执行插件
+                    if pluginObj:
+                
+                        pluginObj._context['self'] = self
+                        pluginObj._context['template_name'] = template_name
+                        pluginObj._context['kwargs'] = kwargs
+
+                        if False == getattr(pluginObj,info['action'])():
+                       
+                            return False
+
+                        self = pluginObj._context['self']
+                        template_name = pluginObj._context['template_name']
+                        kwargs = pluginObj._context['kwargs']
+
             return method(self, template_name, **kwargs)
 
 

@@ -12,7 +12,7 @@ import app.uimodules
 routes = [
     (r"/", app.controller.default.index),
     (r"/PIE.htc", app.controller.default.PIE),
-    (r"/plugin/(\w+)/static/([a-zA-Z_./-0-9]+)$", app.controller.default.plugin),
+    (r"/plugin/(\w+)/static/([a-zA-Z_./-0-9]+)$", app.controller.default.pluginStatic),
 
     (r"/login", app.controller.admin.login),
     (r"/logout", app.controller.admin.logout),

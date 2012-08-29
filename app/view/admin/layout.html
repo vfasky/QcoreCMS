@@ -17,5 +17,10 @@
 </head>
 <body class="wrap">
 	{% block body %}{% end %}
+
+	{% if handler.settings['run_mode'] == 'devel' %}
+	<hr/>
+	run time : {{handler.get_run_time()}}
+	{% end %}
 </body>
 </html>

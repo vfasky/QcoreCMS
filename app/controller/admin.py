@@ -103,6 +103,7 @@ class plugin(BaseAction):
     @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
+
         # 已激活的插件
         wordList = app.plugin.getWork()
         # 所有插件列表
@@ -118,7 +119,7 @@ class plugin(BaseAction):
             pluginObj = app.plugin.getInstantiate(w)
             words.append({
                 'name' : w ,
-                'form' : w.form(),
+                'form' : pluginObj.form() and True or False,
                 'info' : pluginObj.__class__.__doc__
             })
 
@@ -134,6 +135,32 @@ class plugin(BaseAction):
                     plugins=plugins,
                     words=words)
 
+    @app.plugin.controller.beforeExecute
+    @YooYo.acl
+    def post(self):
+        if self.get_argument('act') == 'activation' :
+            plugin = self.get_argument('name')
+            if app.plugin.install(plugin):
+                return self.write({
+                    'success' : True 
+                })
+            else:
+                return self.write({
+                    'success' : False ,
+                    'msg' : '插件不存在 或 已经激活!'
+                })
+
+        if self.get_argument('act') == 'disable' :
+            plugin = self.get_argument('name')
+            if app.plugin.uninstall(plugin):
+                return self.write({
+                    'success' : True 
+                })
+            else:
+                return self.write({
+                    'success' : False ,
+                    'msg' : '插件禁用失败!'
+                })
 
 
 

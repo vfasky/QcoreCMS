@@ -16,7 +16,7 @@ class index(BaseAction):
         	self.session['test'] = 'ok'
         	self.write('write')
 
-class plugin(BaseAction):
+class pluginStatic(BaseAction):
     """插件的静态目录映射"""
     @tornado.web.asynchronous
     @app.plugin.controller.beforeExecute

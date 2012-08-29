@@ -23,7 +23,7 @@
 						{% if v['form'] %}
 						<a href="#" data-name="{{v['name']}}" class="ui-btn ui-btn-small act-edit"><i class="icon-pencil"></i> 配置</a>
 						{% end %}
-						<a href="#" data-name="{{v['name']}}" class="ui-btn-danger ui-btn-small act-del"><i class="icon-off icon-white"></i> 禁用</a>
+						<a href="#" data-name="{{v['name']}}" class="ui-btn-danger ui-btn-small act-disable"><i class="icon-off icon-white"></i> 禁用</a>
 					</td>
 				</tr>
 				{% end %}
@@ -34,7 +34,7 @@
 
 <br/>
 {% end %}
-
+{% if len(plugins) > 0 %}
 <div class="ui-panel">
 	<div class="title">
 		可用的插件
@@ -54,7 +54,7 @@
 					
 					<td>
 						
-						<a href="#" data-name="{{v['name']}}" class="ui-btn ui-btn-small act-edit"><i class="icon-ok"></i> 激活</a>
+						<a href="#" data-name="{{v['name']}}" class="ui-btn ui-btn-small act-activation"><i class="icon-ok"></i> 激活</a>
 						
 					</td>
 				</tr>
@@ -63,12 +63,32 @@
 		</div>
 	</div>
 </div>
-
+{% end %}
 
 <script type="text/javascript">
 	seajs.use(['jquery','app/admin/table','app/admin/pop'] , function(jQuery, table , pop){
 		
-		
+		//激活
+		jQuery('.act-activation').click(function(){
+			var that = jQuery(this);
+			var name = that.attr('data-name');
+			jQuery.post(window.location.href,{ act : 'activation' , name : name },function(json){
+				if(json.success) return window.location.reload();
+				pop.alert(json.msg);
+			},'json');
+			return false;
+		});
+
+		//禁用
+		jQuery('.act-disable').click(function(){
+			var that = jQuery(this);
+			var name = that.attr('data-name');
+			jQuery.post(window.location.href,{ act : 'disable' , name : name },function(json){
+				if(json.success) return window.location.reload();
+				pop.alert(json.msg);
+			},'json');
+			return false;
+		});
 
 		table.render();
 	});

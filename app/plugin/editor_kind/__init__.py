@@ -4,18 +4,19 @@ from app.plugin import base
   
 class editor_kind(base):
     """
-    kind 编辑器
+    kind 可视化编辑器 , 在编辑文章时提供上传,可视化编辑功能
     """   
 
     def onInstall(self):
         self.bind('app.controller.admin.contentAdd',
-                  base.event['beforeRender'],
-                  'bindUIModel')
+                  'beforeRender',
+                  'bindEditor')
 
-        self.bind('app.controller.admin.contentSave',
-                  base.event['beforeRender'],
+        self.bind('app.controller.admin.contentEdit',
+                  'beforeRender',
                   'bindEditor')
 
 
     def bindEditor(self):
-        self.__kwargs['editor'] = 'editor_kind'
+        self._context['kwargs']['editor'] = 'editor_kind'
+        return False

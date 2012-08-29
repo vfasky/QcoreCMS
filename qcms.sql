@@ -227,4 +227,25 @@ BEGIN;
 INSERT INTO `qc_user` VALUES ('3', 'admin', 'admin@admin.com', '23eeeb4347bdd26bfc6b7ee9a3b755dd', '1345443175');
 COMMIT;
 
+-- ----------------------------
+--  Table structure for `qc_plugin`
+-- ----------------------------
+DROP TABLE IF EXISTS `qc_plugin`;
+CREATE TABLE `qc_plugin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `bind` text,
+  `config` text,
+  PRIMARY KEY (`id`),
+  KEY `IX_plugin` (`name`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+--  Records of `qc_plugin`
+-- ----------------------------
+BEGIN;
+INSERT INTO `qc_plugin` VALUES ('1', 'editor_kind', '[{\"action\": \"bindEditor\", \"target\": \"app.controller.admin.contentAdd\", \"event\": \"beforeRender\"}, {\"action\": \"bindEditor\", \"target\": \"app.controller.admin.contentEdit\", \"event\": \"beforeRender\"}]', '\"{}\"');
+COMMIT;
+
+
 SET FOREIGN_KEY_CHECKS = 1;
