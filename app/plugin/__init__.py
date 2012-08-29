@@ -5,6 +5,7 @@ import app.model as model
 import YooYo.util as util
 import YooYo.db.mySql
 import sys
+import os
 import YooYo.form
 
 # 存放插件列表
@@ -155,7 +156,7 @@ def getInstantiate(plugin):
 class base:
     """插件基类"""
 
-    event = ['beforeExecute','afterExecute','beforeRender']
+    event = ('beforeExecute','afterExecute','beforeRender')
 
     def __init__(self):
         self._model = model
@@ -193,7 +194,7 @@ class base:
             })
         
 
-
+    
 
 class UIModule(tornado.web.UIModule):
     '''
@@ -307,3 +308,23 @@ class controller:
 
 
         return wrapper
+
+class Action:
+    '''
+    插件的控制器
+    '''
+    def __init__(self, host , plugin) :
+        self._host = host
+        self._plugin = plugin
+
+    def write(self, chunk):
+        return self._host.write(chunk)
+
+    def static_url(self, path):
+        return '/plugin/%s/static/%s' % ( self._plugin , path )
+
+    def render(self, template_name, **kwargs):
+        template_name = 'app/plugin/%s/view/%s' % ( self._plugin , template_name )
+        template_name = os.path.join( self._host.settings['app_path'] , template_name)
+        return self._host.render(template_name,**kwargs)
+

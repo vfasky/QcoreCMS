@@ -7,16 +7,26 @@ import YooYo.util as util
 import app.model as model
 import app.plugin
 import os 
+import sys
+
+class Action(BaseAction):
+    @app.plugin.controller.beforeRender
+    def render(self, template_name, **kwargs):
+        super(BaseAction, self).render(template_name, **kwargs)
+
+    @app.plugin.controller.afterExecute
+    def finish(self, chunk=None):
+        super(BaseAction, self).finish(chunk)
 
 
-class index(BaseAction):
+class index(Action):
     @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
 
         self.render('admin/index.html')
 
-class logout(BaseAction):
+class logout(Action):
     @app.plugin.controller.beforeExecute
     @YooYo.acl
     def get(self):
@@ -24,7 +34,7 @@ class logout(BaseAction):
         self.redirect('/login')
         
 
-class login(BaseAction):
+class login(Action):
 
     def form(self):
         form = YooYo.form.Form()
@@ -77,7 +87,35 @@ class login(BaseAction):
 
         return self.write({'success' : False , 'msg' : '邮箱或密码错误'})
 
-class plugin(BaseAction):
+class pluginController(Action):
+    """插件的后台 controller 钩子"""
+
+    def getInstantiate(self,plugin):
+        if plugin in app.plugin.getWork():
+            try:
+                controller = 'app.plugin.' + plugin + '.controller'   
+                __import__( controller )
+
+                if hasattr(sys.modules[controller] , 'admin'):
+                    return getattr(sys.modules[controller] , 'admin')(self,plugin)
+            except Exception, e:
+                return False
+        return False
+
+    @YooYo.acl
+    def get(self,plugin):
+        controller = self.getInstantiate(plugin)
+     
+        if controller :
+            return controller.get()
+
+    @YooYo.acl
+    def post(self,plugin):
+        controller = self.getInstantiate(plugin)
+        if controller :
+            return controller.post()
+
+class plugin(Action):
     '''插件管理'''
 
     # 取插件列表
@@ -165,7 +203,7 @@ class plugin(BaseAction):
 
 
 
-class uploadFile(BaseAction):
+class uploadFile(Action):
     """上传文件"""
 
     @app.plugin.controller.beforeExecute
@@ -212,7 +250,7 @@ class uploadFile(BaseAction):
             'url' : url 
         })
 
-class contentEdit(BaseAction):
+class contentEdit(Action):
     '''编辑内容'''
 
     def form(self,id):
@@ -279,7 +317,7 @@ class contentEdit(BaseAction):
 
         
 
-class contentAdd(BaseAction):
+class contentAdd(Action):
     '''添加内容'''
 
     def form(self,id):
@@ -337,7 +375,7 @@ class contentAdd(BaseAction):
             return self.write({'success' : True})
         return self.write({'success' : False , 'msg' : '数据异常'})
 
-class contentList(BaseAction):
+class contentList(Action):
     '''内容列表'''
 
     @app.plugin.controller.beforeExecute
@@ -381,7 +419,7 @@ class contentList(BaseAction):
 
         
 
-class content(BaseAction):
+class content(Action):
     '''内容管理'''
 
     @app.plugin.controller.beforeExecute
@@ -393,7 +431,7 @@ class content(BaseAction):
         self.render('admin/content.html',category=category)
         
 
-class user(BaseAction):
+class user(Action):
     '''会员管理'''
 
     def form(self):
@@ -482,7 +520,7 @@ class user(BaseAction):
                 ret = ar.add(post)
                 return self.write(ret)
 
-class category(BaseAction):
+class category(Action):
     """栏目"""
 
     def form(self):
@@ -565,7 +603,7 @@ class category(BaseAction):
                 return self.redirect(self.request.uri)
 
 
-class model_field(BaseAction):
+class model_field(Action):
     """模型字段管理"""
 
     def form(self):
@@ -688,7 +726,7 @@ class model_field(BaseAction):
 
 
 
-class models(BaseAction):
+class models(Action):
     """模型管理"""
 
     def form(self):
@@ -747,7 +785,7 @@ class models(BaseAction):
                 ar.add(post)
                 return self.redirect(self.request.uri)
 
-class locale(BaseAction):
+class locale(Action):
     """语言管理"""
 
     def form(self):
@@ -802,7 +840,7 @@ class locale(BaseAction):
         
 
 
-class role(BaseAction):
+class role(Action):
     '''角色管理'''
 
     def form(self):

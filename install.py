@@ -68,12 +68,14 @@ import app.uimodules
 routes = [
     (r"/", app.controller.default.index),
     (r"/PIE.htc", app.controller.default.PIE),
+    (r"/plugin/(\w+)$", app.controller.default.pluginController),
     (r"/plugin/(\w+)/static/([a-zA-Z_./-0-9]+)$", app.controller.default.pluginStatic),
 
     (r"/login", app.controller.admin.login),
     (r"/logout", app.controller.admin.logout),
 
     (r"/admin", app.controller.admin.index),
+    (r"/admin/plugin/(\w+)$", app.controller.admin.pluginController),
     (r"/admin/content", app.controller.admin.content),
     (r"/admin/content-add-(\d+)$", app.controller.admin.contentAdd),
     (r"/admin/content-edit-(\d+)-(\d+)-(\d+)$", app.controller.admin.contentEdit),
@@ -94,7 +96,7 @@ routes = [
     (r"/(.+)$", app.controller.default._404),
 ]
 
-'''
+\'\'\'
 访问规则
 =================
 
@@ -103,7 +105,7 @@ routes = [
  - ACL_NO_ROLE 没有角色用户
  - ACL_HAS_ROLE 有角色用户
  
-'''
+\'\'\'
 acl = {
     'app.controller.admin.index' : {
         'allow' : ['admin']
@@ -144,6 +146,9 @@ acl = {
     'app.controller.admin.plugin' : {
         'allow' : ['admin']
     },
+    'app.controller.admin.pluginController' : {
+        'allow' : ['admin']
+    },
     'app.controller.admin.logout' : {
         'allow' : ['ACL_HAS_ROLE']
     },
@@ -162,7 +167,7 @@ settings = {
     'upload_path' : 'file',
     'template_path' : os.path.join(app_path, 'app/view'),
     'autoescape' : None ,
-    'run_mode' : '%s' , #行模式有: devel、test 、deploy  三种
+    'run_mode' : '%s' , #运行模式有: devel、test 、deploy  三种
     'database' : {
         '%s' : {
             'host' : '%s' ,

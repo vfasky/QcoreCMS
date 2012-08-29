@@ -1,13 +1,24 @@
 #coding=utf-8
 from app.controller import BaseAction
 import os
+import sys
 import datetime
 import stat
 import mimetypes
 import tornado.web
 import app.plugin
 
-class index(BaseAction):
+class Action(BaseAction):
+    @app.plugin.controller.beforeRender
+    def render(self, template_name, **kwargs):
+        super(BaseAction, self).render(template_name, **kwargs)
+
+    @app.plugin.controller.afterExecute
+    def finish(self, chunk=None):
+        super(BaseAction, self).finish(chunk)
+
+
+class index(Action):
     @app.plugin.controller.beforeExecute
     def get(self):
         if self.session.get('test'):
@@ -16,7 +27,34 @@ class index(BaseAction):
         	self.session['test'] = 'ok'
         	self.write('write')
 
-class pluginStatic(BaseAction):
+
+class pluginController(Action):
+    """插件的前台 controller 钩子"""
+
+    def getInstantiate(self,plugin):
+        if plugin in app.plugin.getWork():
+            try:
+                controller = 'app.plugin.' + plugin + '.controller'   
+                __import__( controller )
+
+                if hasattr(sys.modules[controller] , 'default'):
+                    return getattr(sys.modules[controller] , 'default')(self,plugin)
+            except Exception, e:
+                return False
+        return False
+
+    def get(self,plugin):
+        controller = self.getInstantiate(plugin)
+        if controller :
+            return controller.get()
+
+    def post(self,plugin):
+        controller = self.getInstantiate(plugin)
+        if controller :
+            return controller.post()
+
+
+class pluginStatic(Action):
     """插件的静态目录映射"""
     @tornado.web.asynchronous
     @app.plugin.controller.beforeExecute
@@ -51,7 +89,7 @@ class pluginStatic(BaseAction):
         return self.finish()
         
 
-class PIE(BaseAction):
+class PIE(Action):
     '''
     PIE makes Internet Explorer 6-9 capable 
     of rendering several of the most useful 
@@ -72,7 +110,7 @@ class PIE(BaseAction):
 
 
 
-class _404(BaseAction):
+class _404(Action):
     @app.plugin.controller.beforeExecute
     def get(self , url):
         self.render('404.html')

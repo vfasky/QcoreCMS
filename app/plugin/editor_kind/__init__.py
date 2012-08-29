@@ -19,4 +19,4 @@ class editor_kind(base):
 
     def bindEditor(self):
         self._context['kwargs']['editor'] = 'editor_kind'
-        return False
+        
