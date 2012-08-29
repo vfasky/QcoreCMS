@@ -316,6 +316,19 @@ define(function(require, exports, module) {
 				form.plugin('ImageUpload',exports.imageUploadPlugin);
 				form.plugin('Photos',exports.photosPlugin);
 				form.plugin('Videos',exports.vidoesPlugin);
+				var title = form.dom.find('[name=title]')
+				var keywords = form.dom.find('[name=keywords]')
+
+				if(keywords.length > 0){
+					title.blur(function(){
+						var kw = title.val();
+						if( '' == jQuery.trim(keywords.val()) ){
+							jQuery.get('/plugin/editor_kind' , {kw : kw} , function(data){
+								keywords.val(data);
+							})
+						}
+					});
+				}
 			}
 		},100);
 	};

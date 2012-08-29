@@ -316,6 +316,10 @@ class Action:
     def __init__(self, host , plugin) :
         self._host = host
         self._plugin = plugin
+        self.request = self._host.request
+
+    def get_argument(self,key,default):
+        return self._host.get_argument(key,default)
 
     def write(self, chunk):
         return self._host.write(chunk)
