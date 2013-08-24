@@ -14,7 +14,6 @@ __all__ = [
 ]
 
 import functools
-from mopee import AsyncModel, CharField, TextField
 from utils import Json
 from tornado import gen
 from tornado.util import import_object 

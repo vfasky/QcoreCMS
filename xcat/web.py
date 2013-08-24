@@ -524,7 +524,6 @@ class RequestHandler(RequestHandler):
 
         context.update(self.ui)
         context.update(kwargs)
-
         template = self.application.jinja_env.get_template(
             template_name,
             parent=self.get_template_path()
