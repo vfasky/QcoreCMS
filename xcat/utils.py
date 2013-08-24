@@ -7,6 +7,7 @@
 
 __all__ = [
     'md5',
+    'sha1',
     'Json',
     'Date',
     'Filters',
@@ -24,9 +25,11 @@ from tornado import escape
 
 
 def md5(s):
-    m = hashlib.md5(str(s))
-    m.digest()
-    return m.hexdigest()
+    return hashlib.md5(str(s)).hexdigest()
+
+def sha1(s):
+    return hashlib.sha1(str(s)).hexdigest()
+
 
 class Json:
     
