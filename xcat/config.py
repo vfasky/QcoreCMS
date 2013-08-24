@@ -22,7 +22,6 @@ _config = {
     'login_url': '/login',
     'version': '1.0.0', 
     'app_path': '',
-    'root_path': '',
     'static_path': '',
     'template_path': '',
     'locale_path': '',

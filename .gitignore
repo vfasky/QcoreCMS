@@ -1,10 +1,4 @@
 .svn
 *.pyc
-.DS_Store
-.DS_Store
 
-app/.DS_Store
-
-*.pyc
-
-*.pyc
+config.py
