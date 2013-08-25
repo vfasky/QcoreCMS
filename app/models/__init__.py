@@ -10,6 +10,7 @@ __all__ = [
 
 from xcat import config
 from xcat.mopee import *
+from xcat.utils import md5
 from tornado import gen
 
 class AsyncModel(AsyncModel):

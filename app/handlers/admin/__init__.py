@@ -53,6 +53,7 @@ class Login(RequestHandler):
         # 写入 session 
         self.set_current_user({
             'id' : user.id ,
+            'gravatar' : user.gravatar_url(80),
             'name' : user.name ,
             'email' : user.email ,
             'sex' : user.sex ,
