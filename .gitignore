@@ -1,4 +1,5 @@
 .svn
 *.pyc
-
+.AppleDouble/
+.DS_Store
 config.py
