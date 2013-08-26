@@ -4,6 +4,11 @@
 # @Author  : vfasky (vfasky@gmail.com)
 # @Link    : http://vfasky.com
 # @Version : $Id$
+__all__ = [
+	'Index',
+	'Login',
+]
+import time
 
 from xcat.web import RequestHandler, route, form, session
 from xcat.utils import sha1
@@ -35,7 +40,11 @@ class Login(RequestHandler):
             self.render('admin/login.html',
                 form=self.form
             )
-            return 
+            return
+		
+		# 防止穷举
+		time.sleep(1.5)
+
         post = self.form.data
         user = User.select().where(User.email == post['email'])\
                             .where(User.password == sha1(post['password']))
