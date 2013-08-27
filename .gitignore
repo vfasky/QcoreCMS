@@ -3,3 +3,7 @@
 .AppleDouble/
 .DS_Store
 config.py
+
+xcat.sublime-project
+
+xcat.sublime-workspace
