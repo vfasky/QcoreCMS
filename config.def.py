@@ -27,10 +27,10 @@ settings = {
     'version': '2.0.0-dev',  
     'devel': {
         'database': mopee.PostgresqlAsyncDatabase('qcorecms',
-            'user' : '',
-            'host' : '127.0.0.1',
-            'password' : '',
-            'size' : 40,
+            user = '',
+            host = '127.0.0.1',
+            password = '',
+            size = 40,
         ),
         'session': {
             'storage': 'Memcache',
@@ -50,10 +50,10 @@ settings = {
     },
     'deploy': {
         'database': mopee.PostgresqlAsyncDatabase('qcorecms',
-            'user' : '',
-            'host' : '127.0.0.1',
-            'password' : '',
-            'size' : 40,
+            user = '',
+            host = '127.0.0.1',
+            password = '',
+            size = 40,
         ),
         'session': {
             'storage': 'Memcache',

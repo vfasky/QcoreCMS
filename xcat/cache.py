@@ -36,21 +36,21 @@ class Memcache(object):
     def get(self, key, default=None, callback=None):
         ret = yield gen.Task(self._conn.get, key)
         if ret is None:
-            callback(default)
+            callback(default, None)
         else:
-            callback(ret)
+            callback(ret, None)
 
     @gen.engine
     def set(self, key, val, left_time=0, callback=None):
         ret = yield gen.Task(self._conn.set, key, val, left_time)
         if callback:
-            callback(ret)
+            callback(ret, None)
 
     @gen.engine
     def remove(self, key, callback=None):
         ret = yield gen.Task(self._conn.delete, key)
         if callback:
-            callback(ret)
+            callback(ret, None)
 
 
 
@@ -160,31 +160,46 @@ class Mongod(object):
 
 # 测试
 if __name__ == '__main__':
-    from tornado.ioloop import IOLoop
-    from tornado.httpserver import HTTPServer
-    #from tornado.options import parse_command_line
-    from tornado.web import asynchronous, RequestHandler, Application
+    import unittest
+    from test import BaseTest
+    class MemcacheTest(BaseTest):
+        '''asyncmemcache Test'''
 
-    cache = Memcache(servers=['127.0.0.1:11211'])
+        def set_up(self):
+            self.cache = Memcache(servers=['127.0.0.1:11211'])
 
-    class Handler(RequestHandler):
-        @asynchronous
-        @gen.engine
-        def get(self):
-            ret = yield gen.Task(cache.set, 'test2', {'hello': 'word'})
-            print ret
-            data = yield gen.Task(cache.get, 'test2')
-            print data
-            print data['hello'] 
-            ret = yield gen.Task(cache.remove, 'test2')
-            print ret
+        def test_set_val(self):
+            '''缓存文本'''
+            self.cache.set('test_set_val', 'ok', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
 
-            self.finish()
-            
-    application = Application([
-        (r'/', Handler),
-    ], debug=True)
+            self.cache.get('test_set_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, 'ok')
 
-    http_server = HTTPServer(application)
-    http_server.listen(8181)
-    IOLoop.instance().start()
+            self.cache.remove('test_set_val', callback=self.stop_callback)
+            self.wait()
+            self.cache.get('test_set_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+        def test_set_obj_val(self):
+            '''缓存对象'''
+            obj_val = {'test': 1}
+            self.cache.set('test_set_obj_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+            self.cache.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, obj_val)
+
+            self.cache.remove('test_set_obj_val', callback=self.stop_callback)
+            self.wait()
+            self.cache.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+    unittest.main()
+ 
