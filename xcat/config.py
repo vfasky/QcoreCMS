@@ -80,13 +80,37 @@ def get(key=None, default=None):
 
 # 测试
 if __name__ == '__main__':
-    set({
-        'static_path' : 'test',
-        'run_mode': 'devel',
-        'devel': {
-            'test' : 'ok?'
-        }
-    })
-    print get()
-    print '======'
-    print get('test')
+    import unittest
+    from test import BaseTest
+
+    class Test(BaseTest):
+
+        def test_load_config(self):
+            load(dict(
+                run_mode = 'devel',
+                test_key = 'no',
+                devel = {'test_key': 'yes'}
+            ))
+
+            self.assert_equal(get('test_key'), 'yes')
+
+        def test_set_run_model(self):
+            try:
+                load(dict(
+                    run_mode = 'test',
+                    test_key = 'no',
+                    devel = {'test_key': 'yes'}
+                ))
+                self.assert_equal(False, True)
+            except Exception, e:
+                self.assert_equal('config syntax', str(e))
+
+        def test_set_val(self):
+            set('test_key', 'ok')
+            self.assert_equal(get('test_key'), 'ok')
+
+        def test_get_default(self):
+            self.assert_equal(get('test_get_def', 'none_data'), 'none_data')
+
+
+    unittest.main()

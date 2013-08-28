@@ -6,7 +6,7 @@
 __all__ = ['Memcache', 'Mongod']
 
 '''
-  持久化缓存
+    缓存
 '''
 import time
 import asyncmemcache
@@ -36,21 +36,21 @@ class Memcache(object):
     def get(self, key, default=None, callback=None):
         ret = yield gen.Task(self._conn.get, key)
         if ret is None:
-            callback(default, None)
+            callback(default)
         else:
-            callback(ret, None)
+            callback(ret)
 
     @gen.engine
     def set(self, key, val, left_time=0, callback=None):
         ret = yield gen.Task(self._conn.set, key, val, left_time)
         if callback:
-            callback(ret, None)
+            callback(ret)
 
     @gen.engine
     def remove(self, key, callback=None):
         ret = yield gen.Task(self._conn.delete, key)
         if callback:
-            callback(ret, None)
+            callback(ret)
 
 
 

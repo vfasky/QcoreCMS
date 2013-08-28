@@ -32,7 +32,7 @@ class BaseTest(AsyncTestCase):
     def tear_down(self):
         pass
 
-    def stop_callback(self, result, error):
+    def stop_callback(self, result, error=None):
         self.stop((result, error))
 
     def run_gen(self, func):
