@@ -78,7 +78,7 @@ class Base(object):
     @gen.engine
     def get(self, key, default=None, callback=None):
         self._data = yield gen.Task(self.get_all)
-        callback(self._data.get(key, default))
+        callback(self._data.get(key, default), None)
 
     @gen.engine
     def remove(self, key, callback=None):
@@ -226,12 +226,60 @@ if __name__ == '__main__':
             self.session = Memcache(
                 'test_session_key', servers=['127.0.0.1:11211'])
 
-        def test_set_val(self):
+        def test_set_get_val(self):
             obj_val = {'test': 1}
             self.session.set(
                 'test_set_obj_val', obj_val, callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, None)
+            
+            self.session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, obj_val)
+
+        def test_time_out(self):
+            import time
+            session = Memcache(
+                'session_time_out_key', 
+                left_time=2,
+                servers=['127.0.0.1:11211'])
+            obj_val = {'test': 1}
+            session.set(
+                'test_set_obj_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+            session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, obj_val)
+            time.sleep(4)
+            session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+        def test_remove(self):
+            obj_val = {'test': 1}
+            self.session.set(
+                'test_remove_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            self.session.remove('test_remove_val', callback=self.stop)
+            self.wait()
+            self.session.get('test_remove_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            
+        def test_clear(self):
+            obj_val = {'test': 1}
+            self.session.set(
+                'test_clear_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            self.session.clear(callback=self.stop)
+            self.wait()
+            self.session.get('test_clear_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+
 
     unittest.main()
 '''
