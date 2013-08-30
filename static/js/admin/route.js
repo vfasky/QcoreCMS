@@ -3,10 +3,10 @@
   define(['admin/app', 'admin/ctrls/category'], function(app, categoryCtrl) {
     var tplPath;
     tplPath = '/static/js/admin/tpls';
-    return app.config([
+    app.config([
       '$routeProvider', function($routeProvider) {
         return $routeProvider.when('/category', {
-          controller: categoryCtrl,
+          controller: "categoryCtrl",
           templateUrl: "" + tplPath + "/category.html"
         });
       }
