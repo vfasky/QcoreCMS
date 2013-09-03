@@ -18,6 +18,8 @@ from tornado import gen
 ========================
 
 '''
+
+
 class Memcache(object):
 
     _conn = None
@@ -29,7 +31,7 @@ class Memcache(object):
         if not self._conn:
             self._conn = asyncmemcache.ClientPool(
                 kwargs['servers'],
-                maxclients = int(kwargs.get('maxclients', 100))
+                maxclients=int(kwargs.get('maxclients', 100))
             )
 
     @gen.engine
@@ -51,7 +53,6 @@ class Memcache(object):
         ret = yield gen.Task(self._conn.delete, key)
         if callback:
             callback(ret)
-
 
 
 '''
@@ -86,18 +87,19 @@ try:
 except Exception, e:
     pass
 
+
 class Mongod(object):
 
     def __init__(self, **kwargs):
         self._conn = asyncmongo.Client(
-            pool_id = kwargs.get('pool_id', 'xcat.cache.Mongod'), 
-            host = kwargs.get('host', '127.0.0.1'), 
-            port = kwargs.get('port', 27017), 
-            maxcached = kwargs.get('maxcached', 10), 
-            maxconnections = kwargs.get('maxconnections', 50), 
-            dbname = kwargs.get('dbname', 'cache'),
-            dbuser = kwargs.get('dbuser', None),
-            dbpass = kwargs.get('dbpass', None)
+            pool_id=kwargs.get('pool_id', 'xcat.cache.Mongod'),
+            host=kwargs.get('host', '127.0.0.1'),
+            port=kwargs.get('port', 27017),
+            maxcached=kwargs.get('maxcached', 10),
+            maxconnections=kwargs.get('maxconnections', 50),
+            dbname=kwargs.get('dbname', 'cache'),
+            dbuser=kwargs.get('dbuser', None),
+            dbpass=kwargs.get('dbpass', None)
         )
 
         self._table = kwargs.get('table', 'caches')
@@ -109,14 +111,14 @@ class Mongod(object):
             if data:
                 last_time = int(data['update_time']) + int(data['left_time'])
 
-                if int(data['left_time']) == -1 or int(time.time()) <= last_time:       
+                if int(data['left_time']) == -1 or int(time.time()) <= last_time:
                     return callback(data['val'])
                 else:
                     self.remove(key)
 
             callback(default)
 
-        self._conn[self._table].find_one({'key': key}, callback=_callback)    
+        self._conn[self._table].find_one({'key': key}, callback=_callback)
 
     @gen.engine
     def set(self, key, val, left_time=-1, callback=None):
@@ -131,19 +133,19 @@ class Mongod(object):
         data = ret[0]
         if not data or len(data) == 0:
             self._conn[self._table].insert({
-                'key' : key,
-                'val' : val,
-                'left_time' : int(left_time),
-                'update_time' : int(time.time()), 
+                'key': key,
+                'val': val,
+                'left_time': int(left_time),
+                'update_time': int(time.time()),
             }, callback=_callback)
         else:
             self._conn[self._table].update({
-                '_id' : data['_id']
-            },{
-                'key' : key,
-                'val' : val,
-                'left_time' : int(left_time),
-                'update_time' : int(time.time()), 
+                '_id': data['_id']
+            }, {
+                'key': key,
+                'val': val,
+                'left_time': int(left_time),
+                'update_time': int(time.time()),
             }, upsert=True, safe=True, callback=_callback)
 
     def remove(self, key, callback=None):
@@ -155,14 +157,16 @@ class Mongod(object):
                 callback(len(data) == 1)
 
         self._conn[self._table].remove({
-            'key' : key
+            'key': key
         }, callback=_callback)
 
 # 测试
 if __name__ == '__main__':
     import unittest
     from test import BaseTest
+
     class MemcacheTest(BaseTest):
+
         '''asyncmemcache Test'''
 
         def set_up(self):
@@ -187,7 +191,8 @@ if __name__ == '__main__':
         def test_set_obj_val(self):
             '''缓存对象'''
             obj_val = {'test': 1}
-            self.cache.set('test_set_obj_val', obj_val, callback=self.stop_callback)
+            self.cache.set(
+                'test_set_obj_val', obj_val, callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, None)
 
@@ -202,4 +207,3 @@ if __name__ == '__main__':
             self.assert_equal(result, None)
 
     unittest.main()
- 

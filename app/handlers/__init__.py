@@ -8,11 +8,11 @@
 import os
 import glob
 
-path     = os.path.dirname(__file__)
+path = os.path.dirname(__file__)
 handlers = []
 
 for name in os.listdir(path):
-    if os.path.isdir(os.path.join(path,name)) :
+    if os.path.isdir(os.path.join(path, name)):
         handlers.append(name)
 
 __all__ = handlers

@@ -93,26 +93,27 @@ if __name__ == '__main__':
 
 from tornado import gen
 from peewee import PostgresqlDatabase, Query, \
-                   SelectQuery, UpdateQuery, InsertQuery, \
-                   DeleteQuery, Model, QueryResultWrapper, \
-                   RawQuery, DictQueryResultWrapper, \
-                   NaiveQueryResultWrapper, \
-                   ModelQueryResultWrapper, \
-                   ModelAlias, with_metaclass, \
-                   BaseModel, CharField, DateTimeField, \
-                   DateField, TimeField, DecimalField, \
-                   ForeignKeyField, PrimaryKeyField, \
-                   TextField, IntegerField, BooleanField, \
-                   FloatField, DoubleField, BigIntegerField, \
-                   DecimalField, BlobField, fn, Field
+    SelectQuery, UpdateQuery, InsertQuery, \
+    DeleteQuery, Model, QueryResultWrapper, \
+    RawQuery, DictQueryResultWrapper, \
+    NaiveQueryResultWrapper, \
+    ModelQueryResultWrapper, \
+    ModelAlias, with_metaclass, \
+    BaseModel, CharField, DateTimeField, \
+    DateField, TimeField, DecimalField, \
+    ForeignKeyField, PrimaryKeyField, \
+    TextField, IntegerField, BooleanField, \
+    FloatField, DoubleField, BigIntegerField, \
+    DecimalField, BlobField, fn, Field
 import momoko
 #import logging
-#logger = logging.getLogger('mopee')    
+#logger = logging.getLogger('mopee')
 
 WaitAllOps = momoko.WaitAllOps
 
+
 class PostgresqlAsyncDatabase(PostgresqlDatabase):
-    
+
     def _connect(self, database, **kwargs):
         return momoko.Pool(
             dsn='dbname=%s user=%s password=%s host=%s port=%s' % (
@@ -123,8 +124,8 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
                 kwargs.get('port', '5432'),
             ),
             size=kwargs.get('size', 10)
-        ) 
-    
+        )
+
     @gen.engine
     def last_insert_id(self, cursor, model, callback=None):
         seq = model._meta.primary_key.sequence
@@ -150,8 +151,10 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
     def create_index(self, model_class, fields, unique=False, callback=None):
         qc = self.compiler()
         if not isinstance(fields, (list, tuple)):
-            raise ValueError('fields passed to "create_index" must be a list or tuple: "%s"' % fields)
-        field_objs = [model_class._meta.fields[f] if isinstance(f, basestring) else f for f in fields]
+            raise ValueError(
+                'fields passed to "create_index" must be a list or tuple: "%s"' % fields)
+        field_objs = [model_class._meta.fields[f]
+                      if isinstance(f, basestring) else f for f in fields]
         return self.execute_sql(qc.create_index(model_class, field_objs, unique), callback=callback)
 
     def create_foreign_key(self, model_class, field, callback=None):
@@ -172,11 +175,8 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
             qc = self.compiler()
             return self.execute_sql(qc.drop_sequence(seq), callback=callback)
 
-
-
     def rows_affected(self, cursor):
         return cursor.rowcount
-
 
     def get_indexes_for_table(self, table, callback=None):
         def _callback(res):
@@ -187,22 +187,22 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
             FROM pg_catalog.pg_class c, pg_catalog.pg_class c2, pg_catalog.pg_index i
             WHERE c.relname = %s AND c.oid = i.indrelid AND i.indexrelid = c2.oid
             ORDER BY i.indisprimary DESC, i.indisunique DESC, c2.relname""", (table,), callback=_callback)
-       
+
     @gen.engine
     def execute_sql(self, sql, params=None, require_commit=True, callback=None):
         params = params or ()
         if require_commit and self.get_autocommit():
             cursors = yield momoko.Op(self.get_conn().transaction, [(sql, params)])
-           
+
             for i, cursor in enumerate(cursors):
                 pass
         else:
-            cursor = yield momoko.Op(self.get_conn().execute, sql, params )
-        
+            cursor = yield momoko.Op(self.get_conn().execute, sql, params)
+
         if callback and cursor:
-            #print cursor
+            # print cursor
             callback(cursor)
-     
+
     def get_tables(self, callback=None):
         def _callback(res):
             if callback:
@@ -227,17 +227,21 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
             WHERE relkind='S'
                 AND pg_class.relnamespace = pg_namespace.oid
                 AND relname=%s""", (sequence,), callback=_callback)
-    
+
     def set_search_path(self, *search_path):
         path_params = ','.join(['%s'] * len(search_path))
         self.execute_sql('SET search_path TO %s' % path_params, search_path)
 
+
 class AsyncQuery(Query):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
         return self.database.execute_sql(sql, params, self.require_commit, callback=callback)
 
+
 class AsyncUpdateQuery(UpdateQuery):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
         return self.database.execute_sql(sql, params, self.require_commit, callback=callback)
@@ -248,7 +252,9 @@ class AsyncUpdateQuery(UpdateQuery):
             callback(ret)
         self._execute(callback=_callback)
 
+
 class AsyncDeleteQuery(DeleteQuery):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
         return self.database.execute_sql(sql, params, self.require_commit, callback=callback)
@@ -258,7 +264,9 @@ class AsyncDeleteQuery(DeleteQuery):
             callback(self.database.rows_affected(cursor))
         self._execute(callback=_callback)
 
+
 class AsyncInsertQuery(InsertQuery):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
         return self.database.execute_sql(sql, params, self.require_commit, callback=callback)
@@ -270,6 +278,7 @@ class AsyncInsertQuery(InsertQuery):
 
 
 class AsyncRawQuery(RawQuery):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
         return self.database.execute_sql(sql, params, self.require_commit, callback=callback)
@@ -282,7 +291,7 @@ class AsyncRawQuery(RawQuery):
                 ResultWrapper = DictQueryResultWrapper
             else:
                 ResultWrapper = NaiveQueryResultWrapper
-            
+
             def _callback(cursor):
                 self._qr = ResultWrapper(self.model_class, cursor, None)
                 callback(self._qr)
@@ -301,9 +310,11 @@ class AsyncRawQuery(RawQuery):
 
 
 class AsyncSelectQuery(SelectQuery):
+
     def _execute(self, callback=None):
         sql, params = self.sql()
-        self.database.execute_sql(sql, params, self.require_commit, callback=callback)
+        self.database.execute_sql(
+            sql, params, self.require_commit, callback=callback)
 
     def scalar(self, as_tuple=False, callback=None):
         def _callback(cursor):
@@ -325,7 +336,7 @@ class AsyncSelectQuery(SelectQuery):
             else:
                 query_meta = [self._select, self._joins]
                 ResultWrapper = ModelQueryResultWrapper
-            
+
             def _callback(cursor):
                 self._qr = ResultWrapper(self.model_class, cursor, query_meta)
                 self._dirty = False
@@ -364,9 +375,10 @@ class AsyncSelectQuery(SelectQuery):
     def exists(self, callback=None):
         clone = self.paginate(1, 1)
         clone._select = [self.model_class._meta.primary_key]
+
         def _callback(row):
             callback(bool(row))
-            
+
         clone.scalar(callback=_callback)
 
     @gen.engine
@@ -376,12 +388,11 @@ class AsyncSelectQuery(SelectQuery):
         try:
             if callback:
                 callback(res._result_cache[0])
-            return 
+            return
         except IndexError:
             pass
         if callback:
             callback(None)
-        
 
     @gen.engine
     def get(self, callback=None):
@@ -395,7 +406,8 @@ class AsyncSelectQuery(SelectQuery):
             raise self.model_class.DoesNotExist('instance matching query does not exist:\nSQL: %s\nPARAMS: %s' % (
                 self.sql()
             ))
-    
+
+
 class AsyncModel(Model):
 
     @classmethod
@@ -426,10 +438,9 @@ class AsyncModel(Model):
     @classmethod
     def create(cls, **query):
         callback = query.pop('callback', None)
-        
+
         inst = cls(**query)
         inst.save(force_insert=True, callback=callback)
-       
 
     # @classmethod
     # def get(cls, *query, **kwargs):
@@ -439,7 +450,6 @@ class AsyncModel(Model):
     #     if kwargs:
     #         sq = sq.filter(**kwargs)
     #     return sq.get
-
     @classmethod
     def get_or_create(cls, **kwargs):
         callback = kwargs.pop('callback', None)
@@ -450,11 +460,10 @@ class AsyncModel(Model):
         except cls.DoesNotExist:
             return cls.create(callback=callback, **kwargs)
 
-
     @classmethod
     @gen.engine
     def table_exists(cls, callback=None):
-    
+
         tables = yield gen.Task(cls._meta.database.get_tables)
 
         if callback:
@@ -481,15 +490,14 @@ class AsyncModel(Model):
                 yield gen.Task(db.create_foreign_key, cls, field_obj)
             elif field_obj.index or field_obj.unique:
                 yield gen.Task(db.create_index, cls, [field_obj], field_obj.unique)
-      
+
         if cls._meta.indexes:
             for fields, unique in cls._meta.indexes:
                 count = count + 1
                 yield gen.Task(db.create_index, cls, fields, unique)
-        
+
         if callback:
             callback(cursor)
-        
 
     @classmethod
     def drop_table(cls, fail_silently=False, callback=None):
@@ -501,7 +509,7 @@ class AsyncModel(Model):
         pk = self._meta.primary_key
         if only:
             field_dict = self._prune_fields(field_dict, only)
-        
+
         if self.get_id() is not None and not force_insert:
             field_dict.pop(pk.name, None)
             update = self.update(
@@ -516,15 +524,14 @@ class AsyncModel(Model):
             if self._meta.auto_increment:
                 field_dict.pop(pk.name, None)
             insert = self.insert(**field_dict)
-            
+
             new_pk = yield gen.Task(insert.execute)
             if self._meta.auto_increment:
                 self.set_id(new_pk)
 
             if callback:
                 callback(new_pk)
-            
-        
+
     @gen.engine
     def delete_instance(self, recursive=False, delete_nullable=False, callback=None):
         if recursive:
@@ -534,7 +541,7 @@ class AsyncModel(Model):
                 else:
                     yield genTask(fk.model_class.delete().where(query).execute)
         yield genTask(self.delete().where(self._meta.primary_key == self.get_id()).execute)
-        
+
         if callback:
             callback()
 
@@ -546,27 +553,28 @@ if __name__ == '__main__':
     from tornado.web import asynchronous, RequestHandler, Application
 
     database = PostgresqlAsyncDatabase('test',
-        user = 'vfasky',
-        host = '127.0.0.1',
-        password = '19851024',
-        size = 20,
-    )
+                                       user='vfasky',
+                                       host='127.0.0.1',
+                                       password='19851024',
+                                       size=20,
+                                       )
 
     class User(AsyncModel):
+
         class Meta:
             database = database
 
         name = CharField()
-        password = CharField(max_length = 255)
+        password = CharField(max_length=255)
 
     database.connect()
 
-
     class AsyncHandler(RequestHandler):
+
         @asynchronous
         @gen.engine
         def get(self):
-            exists =  yield gen.Task(User.table_exists)
+            exists = yield gen.Task(User.table_exists)
             if not exists:
                 yield gen.Task(User.create_table)
 
@@ -574,10 +582,10 @@ if __name__ == '__main__':
             user = User()
             user.name = 'test3'
             user.password = '5677'
-            
+
             yield gen.Task(user.save)
             print user.id
-            
+
             # edit
             user = yield gen.Task(User.get(User.id == 9))
             user.name = 'test03'
@@ -586,11 +594,11 @@ if __name__ == '__main__':
 
             # count
             count = yield gen.Task(User.select(User.name).where(User.name == 'test03').count)
-            print count 
+            print count
 
             # delete
             ret = yield gen.Task(User.delete().where(User.name % 'test%').execute)
-            print ret 
+            print ret
 
             # user = yield gen.Task(User.select().where(User.name == 'wing').get)
             # self.write(user.name)

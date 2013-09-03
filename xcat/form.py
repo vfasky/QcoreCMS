@@ -5,7 +5,7 @@
 # @Link    : http://vfasky.com
 # @Version : $Id$
 
-__all__ = [  
+__all__ = [
     'Form',
     'fields',
     'validators',
@@ -19,7 +19,9 @@ from tornado.escape import to_unicode
 from wtforms import Form as wtForm, fields, validators, widgets, ValidationError
 from wtforms.compat import iteritems
 
+
 class Form(wtForm):
+
     """
     Using this Form instead of wtforms.Form
 
@@ -34,6 +36,7 @@ class Form(wtForm):
                 form = SigninForm(self.request.arguments, locale_code=self.locale.code)
 
     """
+
     def __init__(self, formdata=None, obj=None, prefix='', locale_code='en_US', **kwargs):
         self._locale_code = locale_code
         super(Form, self).__init__(formdata, obj, prefix, **kwargs)
@@ -43,40 +46,40 @@ class Form(wtForm):
             formdata = TornadoArgumentsWrapper(formdata)
         super(Form, self).process(formdata, obj, **kwargs)
 
-    
     def load_data(self, obj):
         formdata = TornadoArgumentsWrapper(MopeeObjWrapper(obj, self))
         return self.process(formdata)
-
 
     def _get_translations(self):
         if not hasattr(self, '_locale_code'):
             self._locale_code = 'en_US'
         return TornadoLocaleWrapper(self._locale_code)
 
+
 def MopeeObjWrapper(obj, form):
     data = {}
     model = obj
     if type(obj) is types.DictType:
-        for field in form._fields: 
+        for field in form._fields:
             if model.has_key(field):
                 value = model.get(field)
                 if type(value) is types.ListType:
                     data[field] = value
                 else:
-                    data[field] = [ str(value) ]
+                    data[field] = [str(value)]
     else:
-        for field in form._fields: 
+        for field in form._fields:
             if hasattr(model, field):
-                value = getattr(model,field)
+                value = getattr(model, field)
                 if type(value) is types.ListType:
                     data[field] = value
                 else:
-                    data[field] = [ str(value) ]
+                    data[field] = [str(value)]
     return data
 
 
 class TornadoArgumentsWrapper(dict):
+
     def __getattr__(self, key):
         try:
             return self[key]
@@ -107,6 +110,7 @@ class TornadoArgumentsWrapper(dict):
 
 
 class TornadoLocaleWrapper(object):
+
     def __init__(self, code):
         self.locale = tornado.locale.get(code)
 

@@ -27,14 +27,15 @@ from tornado import escape
 def md5(s):
     return hashlib.md5(str(s)).hexdigest()
 
+
 def sha1(s):
     return hashlib.sha1(str(s)).hexdigest()
 
 
 class Json:
-    
+
     @staticmethod
-    def decode(s,default=[]):
+    def decode(s, default=[]):
         s = Filters.trim(str(s))
         if '' == s:
             return default
@@ -43,11 +44,9 @@ class Json:
         except Exception, e:
             return default
 
-
     @staticmethod
     def encode(json):
         return escape.json_encode(json)
-   
 
 
 class Filters:
@@ -94,25 +93,25 @@ class Filters:
             hour = str(hour)
             if int(hour) < 10:
                 hour = '0' + hour
-          
+
             minute = str(minute)
             if int(minute) < 10:
                 minute = '0' + minute
-            
+
             return '%s:%s' % (hour, minute)
-                
-        return '00:00' 
+
+        return '00:00'
 
     # @staticmethod
     # def to_json(s):
     #     return Json.encode(s)
 
-   
     @staticmethod
     def to_text(s):
-        if None == s : return None
-        html   = s.strip()
-        html   = html.strip("\n")
+        if None == s:
+            return None
+        html = s.strip()
+        html = html.strip("\n")
         result = []
         parser = HTMLParser()
         parser.handle_data = result.append
@@ -121,9 +120,8 @@ class Filters:
         return ''.join(result)
 
 
-
-
 class Validators:
+
     '''
     验证类
     =============
@@ -152,13 +150,13 @@ class Validators:
     def is_number(x):
         rule = '[+-]?\d+$'
         return re.match(rule, str(x))
-            
-    #判断是否为浮点数 1.324
+
+    # 判断是否为浮点数 1.324
     @staticmethod
     def is_float(x):
         return type(x) is types.FloatType
 
-    #判断是否为字典 {'a1':'1','a2':'2'}
+    # 判断是否为字典 {'a1':'1','a2':'2'}
     @staticmethod
     def is_dict(x):
         return type(x) is types.DictType
@@ -171,66 +169,63 @@ class Validators:
     def is_empty(x):
         if type(x) is types.NoneType:
             return True
-        if Validators.is_number(x): 
+        if Validators.is_number(x):
             return False
         return len(x) == 0
 
-    #判断是否为日期格式,并且是否符合日历规则 2010-01-31
+    # 判断是否为日期格式,并且是否符合日历规则 2010-01-31
     @staticmethod
     def is_date(x):
         x = str(x)
         if len(x) == 10:
             rule = '(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$/'
-            match = re.match( rule , x )
+            match = re.match(rule, x)
             if match:
                 return True
             return False
         return False
 
-
-
-    #判断是否为邮件地址
+    # 判断是否为邮件地址
     @staticmethod
     def is_email(x):
         x = str(x)
         rule = '[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$'
-        match = re.match( rule , x )
+        match = re.match(rule, x)
 
         if match:
             return True
         return False
 
-    #判断是否为中文字符串
+    # 判断是否为中文字符串
     @staticmethod
     def is_chinese_char_string(x):
         x = str(x)
         for v in x:
-            if (v >= u"\u4e00" and v<=u"\u9fa5") or (v >= u'\u0041' and v<=u'\u005a') or (v >= u'\u0061' and v<=u'\u007a'):
+            if (v >= u"\u4e00" and v <= u"\u9fa5") or (v >= u'\u0041' and v <= u'\u005a') or (v >= u'\u0061' and v <= u'\u007a'):
                 continue
             else:
                 return False
         return True
 
-    #判断帐号是否合法 字母开头，允许4-16字节，允许字母数字下划线
+    # 判断帐号是否合法 字母开头，允许4-16字节，允许字母数字下划线
     @staticmethod
     def is_legal_accounts(x):
         x = str(x)
         rule = '[a-zA-Z][a-zA-Z0-9_]{3,15}$'
-        match = re.match( rule , x )
+        match = re.match(rule, x)
 
         if match:
             return True
         return False
 
-    #匹配IP地址
+    # 匹配IP地址
     @staticmethod
     def is_ip_addr(x):
         x = str(x)
         #rule = '\d+\.\d+\.\d+\.\d+'
         rule = '((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)'
-        match = re.match( rule , x )
+        match = re.match(rule, x)
 
         if match:
             return True
         return False
-

@@ -5,7 +5,7 @@
 # @Link    : http://vfasky.com
 # @Version : $Id$
 from xcat.utils import sha1
-from xcat.web import RequestHandler, route 
+from xcat.web import RequestHandler, route
 from tornado import gen
 from tornado.web import asynchronous
 from app import models
@@ -13,15 +13,19 @@ from app.models import cms
 
 import time
 
+
 @route(r"/")
 class Index(RequestHandler):
+
     """Home"""
 
     def get(self):
         self.write('hello QcoreCMS')
 
+
 @route(r"/install")
 class Install(RequestHandler):
+
     """Install"""
 
     @gen.engine
@@ -29,9 +33,9 @@ class Install(RequestHandler):
         for v in keys:
             if hasattr(class_list, v):
                 model = getattr(class_list, v)
-                exists = yield gen.Task(model.table_exists) 
+                exists = yield gen.Task(model.table_exists)
                 if not exists:
-                    yield gen.Task(model.create_table) 
+                    yield gen.Task(model.create_table)
 
         if callback:
             callback(True)
@@ -40,16 +44,16 @@ class Install(RequestHandler):
     def creat_model(self, table, title, callback):
         # 默认模型定义
         field_base_data = {
-           'ui' : (yield gen.Task(
-                cms.FieldUi.select().where(cms.FieldUi.name == 'textarea')\
-                                    .where(cms.FieldUi.plugin == 'editor')\
+            'ui': (yield gen.Task(
+                cms.FieldUi.select().where(cms.FieldUi.name == 'textarea')
+                                    .where(cms.FieldUi.plugin == 'editor')
                                     .get
             )),
-           'field' : 'TextField',
-           'name': 'content',
-           'label': '内容', 
+            'field': 'TextField',
+            'name': 'content',
+            'label': '内容',
         }
-        
+
         model_table_ar = cms.Table.select().where(cms.Table.table == table)
 
         # 创建模型
@@ -64,24 +68,22 @@ class Install(RequestHandler):
             table_field = cms.TableField(**field_base_data)
             table_field.table = model_table
             yield gen.Task(table_field.save)
-            
+
             # 创建模型
             model_model = model_table.get_model()
-            exists = yield gen.Task(model_model.table_exists) 
+            exists = yield gen.Task(model_model.table_exists)
             if not exists:
                 yield gen.Task(model_model.create_table)
 
             # 创建扩展模型
             model_ext_model = yield gen.Task(model_table.get_data_model)
-            exists = yield gen.Task(model_ext_model.table_exists) 
+            exists = yield gen.Task(model_ext_model.table_exists)
             if not exists:
                 yield gen.Task(model_ext_model.create_table)
         else:
             model_table = yield gen.Task(model_table_ar.get)
 
         callback(model_table)
-
-
 
     @asynchronous
     @gen.engine
@@ -109,7 +111,7 @@ class Install(RequestHandler):
             user_role.name = '会员'
             yield gen.Task(user_role.save)
 
-            # 创建管理员 
+            # 创建管理员
             settings = self.settings
 
             user = models.User()
@@ -117,7 +119,7 @@ class Install(RequestHandler):
             user.email = settings['admin_email']
             user.password = sha1(settings['admin_passwd'])
             user.register_date = time.time()
-            yield gen.Task(user.save) 
+            yield gen.Task(user.save)
 
             user_role = models.UserRole()
             user_role.user = user
@@ -136,9 +138,10 @@ class Install(RequestHandler):
                 {'name': 'textarea', 'desc': '富文本编辑器', 'plugin': 'editor'},
                 {'name': 'input', 'desc': '隐藏值', 'plugin': 'hidden'},
                 {'name': 'input', 'desc': '图片上传', 'plugin': 'image_upload'},
-                {'name': 'textarea', 'desc': '组图上传', 'plugin' : 'images_upload'},
+                {'name': 'textarea', 'desc': '组图上传',
+                    'plugin': 'images_upload'},
                 {'name': 'input', 'desc': '文件上传', 'plugin': 'file_upload'},
-            ] 
+            ]
             for v in ui_list:
                 field_ui = cms.FieldUi(**v)
                 yield gen.Task(field_ui.save)
@@ -167,9 +170,5 @@ class Install(RequestHandler):
             news_category.table = news_table
             yield gen.Task(news_category.save)
 
-
-
         self.write('ok')
         self.finish()
-
-          

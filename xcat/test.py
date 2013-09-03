@@ -11,11 +11,14 @@ __all__ = [
 
 from tornado.testing import AsyncTestCase
 
+
 class BaseTest(AsyncTestCase):
+
     def __init__(self, *args, **kwargs):
         self.assert_equal = self.assertEqual
         self.assert_raises = self.assertRaises
-        self.assert_is_instance = lambda object, classinfo: self.assertTrue(isinstance(object, classinfo))
+        self.assert_is_instance = lambda object, classinfo: self.assertTrue(
+            isinstance(object, classinfo))
         super(BaseTest, self).__init__(*args, **kwargs)
 
     def setUp(self):

@@ -18,9 +18,9 @@ import copy
 
 _config = {
     'run_mode': 'devel',
-    'acls': [], 
+    'acls': [],
     'login_url': '/login',
-    'version': '1.0.0', 
+    'version': '1.0.0',
     'app_path': '',
     'static_path': '',
     'template_path': '',
@@ -28,18 +28,18 @@ _config = {
     'debug': True,
     'gzip': True,
     'cookie_secret': 'this-Xcat-app',
-    'xsrf_cookies': True,  
+    'xsrf_cookies': True,
     'autoescape': None,
     'sync_key': 'xcat.web.Application.id',
     'devel': {
         'database': None,
         'session': None,
-        'cache': None,   
+        'cache': None,
     },
     'deploy': {
         'database': None,
         'session': None,
-        'cache': None,   
+        'cache': None,
     },
 }
 # 运行模式类型
@@ -48,27 +48,33 @@ _model_type = ('devel', 'deploy')
 _run_mode = 'devel'
 
 # 设置配置
+
+
 def load(config):
     global _config, _run_mode
 
     if config.has_key('run_mode')\
-    and config['run_mode'] in _model_type\
-    and config.has_key(config['run_mode']):
+        and config['run_mode'] in _model_type\
+        and config.has_key(config['run_mode']):
         _run_mode = config['run_mode']
         _evn_cfg = copy.copy(_config[_run_mode])
         _evn_cfg.update(config[_run_mode])
-        
+
         _config.update(config)
         _config.update(_evn_cfg)
     else:
         raise NameError, 'config syntax'
 
 # 设置配置
+
+
 def set(key, value):
     global _config
     _config[key] = value
 
 # 设置配置
+
+
 def get(key=None, default=None):
     if None == key:
         return _config
@@ -87,9 +93,9 @@ if __name__ == '__main__':
 
         def test_load_config(self):
             load(dict(
-                run_mode = 'devel',
-                test_key = 'no',
-                devel = {'test_key': 'yes'}
+                run_mode='devel',
+                test_key='no',
+                devel={'test_key': 'yes'}
             ))
 
             self.assert_equal(get('test_key'), 'yes')
@@ -97,9 +103,9 @@ if __name__ == '__main__':
         def test_set_run_model(self):
             try:
                 load(dict(
-                    run_mode = 'test',
-                    test_key = 'no',
-                    devel = {'test_key': 'yes'}
+                    run_mode='test',
+                    test_key='no',
+                    devel={'test_key': 'yes'}
                 ))
                 self.assert_equal(False, True)
             except Exception, e:
@@ -111,6 +117,5 @@ if __name__ == '__main__':
 
         def test_get_default(self):
             self.assert_equal(get('test_get_def', 'none_data'), 'none_data')
-
 
     unittest.main()

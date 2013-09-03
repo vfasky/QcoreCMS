@@ -9,7 +9,9 @@ import arrow
 from xcat.form import Form, validators, fields
 from tornado import gen
 
+
 class Login(Form):
+
     '''登陆表单'''
     email = fields.TextField(
         'Email', [
@@ -19,7 +21,7 @@ class Login(Form):
         ]
     )
     password = fields.PasswordField(
-        'Password',[
+        'Password', [
             validators.Required(),
         ]
     )
