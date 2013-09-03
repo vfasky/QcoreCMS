@@ -78,7 +78,7 @@ class Base(object):
     @gen.engine
     def get(self, key, default=None, callback=None):
         self._data = yield gen.Task(self.get_all)
-        callback(self._data.get(key, default))
+        callback(self._data.get(key, default), None)
 
     @gen.engine
     def remove(self, key, callback=None):
@@ -226,53 +226,59 @@ if __name__ == '__main__':
             self.session = Memcache(
                 'test_session_key', servers=['127.0.0.1:11211'])
 
-        def test_set_val(self):
+        def test_set_get_val(self):
             obj_val = {'test': 1}
             self.session.set(
                 'test_set_obj_val', obj_val, callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, None)
+            
+            self.session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, obj_val)
+
+        def test_time_out(self):
+            import time
+            session = Memcache(
+                'session_time_out_key', 
+                left_time=2,
+                servers=['127.0.0.1:11211'])
+            obj_val = {'test': 1}
+            session.set(
+                'test_set_obj_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+            session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, obj_val)
+            time.sleep(4)
+            session.get('test_set_obj_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+
+        def test_remove(self):
+            obj_val = {'test': 1}
+            self.session.set(
+                'test_remove_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            self.session.remove('test_remove_val', callback=self.stop)
+            self.wait()
+            self.session.get('test_remove_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            
+        def test_clear(self):
+            obj_val = {'test': 1}
+            self.session.set(
+                'test_clear_val', obj_val, callback=self.stop_callback)
+            result = self.wait_for_result()
+            self.assert_equal(result, None)
+            self.session.clear(callback=self.stop)
+            self.wait()
+            self.session.get('test_clear_val', callback=self.stop_callback)
+            result = self.wait_for_result()
+
 
     unittest.main()
-'''
-if __name__ == '__main__':
-    from tornado.ioloop import IOLoop
-    from tornado.httpserver import HTTPServer
-    from tornado.web import asynchronous, RequestHandler, Application
-
-    class Handler(RequestHandler):
-
-        def initialize(self):
-            key = 'PYSESSID'
-            
-            if self.get_secure_cookie(key):
-                self.session = Memcache(self.get_secure_cookie(key), servers=['127.0.0.1:11211'])
-            else:
-                session = Memcache(str(uuid.uuid4()), servers=['127.0.0.1:11211'])
-                self.set_secure_cookie(key , session.id)
-                self.session = session
-            
-
-        @asynchronous
-        @gen.engine
-        def get(self):
-            ret = yield gen.Task(self.session.set, 'test2', {'hello': 'word'})
-            print ret
-            data = yield gen.Task(self.session.get, 'test2')
-            print data 
-            ret = yield gen.Task(self.session.remove, 'test2')
-            print ret
-            ret = yield gen.Task(self.session.clear)
-            print ret
-            self.write('test')
-
-            self.finish()
-            
-    application = Application([
-        (r'/', Handler),
-    ], debug=True, cookie_secret="fsfwo#@(sfk")
-
-    http_server = HTTPServer(application)
-    http_server.listen(8181)
-    IOLoop.instance().start()
-'''
