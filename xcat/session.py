@@ -232,7 +232,7 @@ if __name__ == '__main__':
                 'test_set_obj_val', obj_val, callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, None)
-            
+
             self.session.get('test_set_obj_val', callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, obj_val)
@@ -240,7 +240,7 @@ if __name__ == '__main__':
         def test_time_out(self):
             import time
             session = Memcache(
-                'session_time_out_key', 
+                'session_time_out_key',
                 left_time=2,
                 servers=['127.0.0.1:11211'])
             obj_val = {'test': 1}
@@ -268,7 +268,7 @@ if __name__ == '__main__':
             self.session.get('test_remove_val', callback=self.stop_callback)
             result = self.wait_for_result()
             self.assert_equal(result, None)
-            
+
         def test_clear(self):
             obj_val = {'test': 1}
             self.session.set(
@@ -279,6 +279,5 @@ if __name__ == '__main__':
             self.wait()
             self.session.get('test_clear_val', callback=self.stop_callback)
             result = self.wait_for_result()
-
 
     unittest.main()
