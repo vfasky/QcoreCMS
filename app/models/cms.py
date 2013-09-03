@@ -8,11 +8,9 @@ __all__ = [
     'Content',
     'ContentData',
 ]
-import re
-from peewee import RelationDescriptor, ReverseRelationDescriptor
 from xcat import mopee
 from tornado import gen
-from ..models import AsyncModel, User
+from app.models import AsyncModel, User
 
 # 表前缀
 table_prefix = 'cms_'
