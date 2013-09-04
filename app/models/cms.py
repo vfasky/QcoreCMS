@@ -127,6 +127,52 @@ class Category(AsyncModel):
 
     order = mopee.IntegerField(default=0, index=True)
 
+    @classmethod
+    @gen.engine
+    def td_tree(cls, callback):
+        '''返回二维树'''
+        tree_list = yield gen.Task(cls.tree)
+        td_tree_list = []
+
+        def get_childs(item):
+            v = item
+            v['icon'] = '-'.join(range(0, v['level'])) + '|'
+            child_tree = v.pop('child_tree')
+            td_tree_list.append(v)
+            for c in child_tree:
+                get_childs(c)
+
+        for v in tree_list:
+            get_childs(v)
+
+        callback(td_tree_list)
+   
+    @classmethod
+    @gen.engine
+    def tree(cls, callback):
+        '''返回多维树'''
+        data = yield gen.Task(cls.select().execute)
+        root_tree = {}
+        for v in data:
+            item = v._data
+            item['level'] = len(item['parents'].split(',')) - 3
+            root_tree.setdefault(item['level'], [])
+            root_tree[item['level']].append(item)
+
+        def get_childs(item):
+            child_tree = []
+            for v in root_tree.get(item['level'] + 1, []):
+                if v['parents'].find(item['parents']) == 0:
+                    v['child_tree'] = get_childs(v)
+                    child_tree.append(v)
+            return child_tree
+
+        tree_list = []
+        for v in root_tree.get(0, []):
+            v['child_tree'] = get_childs(v)
+            tree_list.append(v)
+
+        callback(tree_list)
 
 def content_clone(table):
     '''复制一个内容索引模型'''

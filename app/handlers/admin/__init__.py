@@ -32,13 +32,14 @@ class Login(RequestHandler):
 
     '''Admin Login'''
 
-    @form('app.form.Login')
+    @form('app.forms.Login')
     def get(self):
         self.render('admin/login.html', form=self.form)
 
-    @form('app.form.Login')
+    @form('app.forms.Login')
     @session
     @gen.engine
+    @asynchronous
     def post(self):
         if not self.form.validate():
             self.render('admin/login.html',

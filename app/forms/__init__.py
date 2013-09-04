@@ -5,9 +5,7 @@ __all__ = [
     'Login',
 ]
 
-import arrow
 from xcat.form import Form, validators, fields
-from tornado import gen
 
 
 class Login(Form):
