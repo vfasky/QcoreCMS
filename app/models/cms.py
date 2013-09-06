@@ -120,11 +120,6 @@ class Category(AsyncModel):
     # 父id
     parent = mopee.IntegerField(default=0, index=True)
 
-    # 祖先树
-    parents = mopee.TextField(default=',0,')
-    # 子孙树 -_-!
-    childs = mopee.TextField(default=',')
-
     order = mopee.IntegerField(default=0, index=True)
 
     @classmethod
