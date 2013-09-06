@@ -147,23 +147,28 @@ class Category(AsyncModel):
     def tree(cls, callback):
         '''返回多维树'''
         data = yield gen.Task(cls.select().execute)
-        root_tree = {}
+        all_tree = []
+        root_tree = []
         for v in data:
             item = v._data
-            item['level'] = len(item['parents'].split(',')) - 3
-            root_tree.setdefault(item['level'], [])
-            root_tree[item['level']].append(item)
+            all_tree.append(item)
+            if item['parent'] == 0:
+                root_tree.append(item)
+                all_tree.remove(item)
 
         def get_childs(item):
             child_tree = []
-            for v in root_tree.get(item['level'] + 1, []):
-                if v['parents'].find(item['parents']) == 0:
+            for v in all_tree:
+                if v['parent'] == item['id']:
+                    all_tree.remove(v)
+                    v['level'] = item['level'] + 1
                     v['child_tree'] = get_childs(v)
                     child_tree.append(v)
             return child_tree
 
         tree_list = []
-        for v in root_tree.get(0, []):
+        for v in root_tree:
+            v['level'] = 0
             v['child_tree'] = get_childs(v)
             tree_list.append(v)
 

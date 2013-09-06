@@ -18,12 +18,14 @@ class CategoryAdd(Form):
     title = fields.TextField(
         '名称', [
             validators.Required(),
+            validators.Length(min=3, max=100),
         ]
     )
     
     desc = fields.TextField(
         '描述', [
             validators.Required(),
+            validators.Length(min=3, max=255),
         ]
     )
 

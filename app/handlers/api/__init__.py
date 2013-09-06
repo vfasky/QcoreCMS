@@ -42,27 +42,53 @@ class CategoryList(RequestHandler):
         self.jsonify(data=tree)
 
 
-@route("/api/category.add")
+@route("/api/category.add", allow=['admin'])
 class CategoryAdd(RequestHandler):
 
     @asynchronous
     @gen.engine
     @form('app.forms.cms.CategoryAdd')
-    def get(self): #todo change post
+    def post(self): 
         yield gen.Task(self.form.load_field_data)
 
         if not self.form.validate():
             self.jsonify(
                 success=False,
-                msg=' \n '.join(self.format_form_error(self.form))
-            )
+                msg=' \n '.join(self.format_form_error(self.form)))
             return
 
         post = self.form.data
 
-        if post.parent == '0':
-            # 一级分类
-            pass
+        if post['parent'] != '0':
+            #检查上级是否存在
+            category_ar = cms.Category.select()\
+                .where(cms.Category.id == post['parent'])
+            
+            if 0 == (yield gen.Task(category_ar.count)):
+                self.jsonify(
+                    success=False,
+                    msg='parent Not Fount')
+                return
+        # 防止重复添加
+        category_ar = cms.Category.select()\
+                .where(cms.Category.parent == post['parent'])\
+                .where(cms.Category.title == post['title'])\
+                .where(cms.Category.desc == post['desc'])\
+                .where(cms.Category.table == (yield gen.Task(
+                    cms.Table.select().where(cms.Table.id == post['table'])\
+                            .get)))
+
+        if 0 != (yield gen.Task(category_ar.count)):
+            self.jsonify(
+                success=False,
+                msg='data is has')
+            return
+
+        category = cms.Category(**post)
+        yield gen.Task(category.save)
+
+        self.jsonify(data=category._data)
+        
         
 
 
