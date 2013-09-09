@@ -4,7 +4,8 @@
     var tplPath;
     tplPath = '/static/js/admin/tpls';
     app.config([
-      '$routeProvider', function($routeProvider) {
+      '$routeProvider', function($routeProvider, $http) {
+        $http.defaults.headers.post;
         return $routeProvider.when('/category', {
           controller: "categoryCtrl",
           templateUrl: "" + tplPath + "/category.html"
