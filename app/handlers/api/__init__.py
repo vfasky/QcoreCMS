@@ -66,7 +66,7 @@ class CategorySave(RequestHandler):
             if 0 == (yield gen.Task(category_ar.count)):
                 self.jsonify(
                     success=False,
-                    msg='not Data'
+                    msg='not Data')
                 return
             category_model = yield gen.Task(category_ar.get)
         else:
