@@ -42,8 +42,8 @@ class CategoryList(RequestHandler):
         self.jsonify(data=tree)
 
 
-@route("/api/category.add", allow=['admin'])
-class CategoryAdd(RequestHandler):
+@route("/api/category.save", allow=['admin'])
+class CategorySave(RequestHandler):
 
     @asynchronous
     @gen.engine
@@ -59,6 +59,19 @@ class CategoryAdd(RequestHandler):
 
         post = self.form.data
 
+        if post['id']:
+            category_ar = cms.Category.select()\
+                .where(cms.Category.id == post['id'])
+
+            if 0 == (yield gen.Task(category_ar.count)):
+                self.jsonify(
+                    success=False,
+                    msg='not Data'
+                return
+            category_model = yield gen.Task(category_ar.get)
+        else:
+            category_model = False
+
         if post['parent'] != '0':
             #检查上级是否存在
             category_ar = cms.Category.select()\
@@ -69,8 +82,10 @@ class CategoryAdd(RequestHandler):
                     success=False,
                     msg='parent Not Fount')
                 return
-        # 防止重复添加
-        category_ar = cms.Category.select()\
+
+        if False == category_model:
+            # 防止重复添加
+            category_ar = cms.Category.select()\
                 .where(cms.Category.parent == post['parent'])\
                 .where(cms.Category.title == post['title'])\
                 .where(cms.Category.desc == post['desc'])\
@@ -78,15 +93,18 @@ class CategoryAdd(RequestHandler):
                     cms.Table.select().where(cms.Table.id == post['table'])\
                             .get)))
 
-        if 0 != (yield gen.Task(category_ar.count)):
-            self.jsonify(
-                success=False,
-                msg='data is has')
-            return
+            if 0 != (yield gen.Task(category_ar.count)):
+                self.jsonify(
+                    success=False,
+                    msg='data is has')
+                return
 
-        category = cms.Category(**post)
-        yield gen.Task(category.save)
-
+            category = cms.Category(**post)
+            yield gen.Task(category.save)
+        else:
+            self.form.data_to_model(category_model)
+            yield gen.Task(category_model.save)
+                    
         self.jsonify(data=category._data)
         
         

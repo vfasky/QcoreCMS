@@ -9,7 +9,9 @@ from xcat.form import Form, validators, fields
 from app.models import cms
 
 class CategoryAdd(Form):
-    '''分类添加'''
+    '''分类表单'''
+    id = fields.HiddenField()
+    
     parent = fields.SelectField(
         '上级',
         choices=[],

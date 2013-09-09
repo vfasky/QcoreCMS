@@ -50,6 +50,13 @@ class Form(wtForm):
         formdata = TornadoArgumentsWrapper(MopeeObjWrapper(obj, self))
         return self.process(formdata)
 
+    def data_to_model(self, model):
+        for v in self.data:
+            if hasattr(model, v):
+                setattr(model, v, self.data[v])
+
+        return model
+
     def _get_translations(self):
         if not hasattr(self, '_locale_code'):
             self._locale_code = 'en_US'
