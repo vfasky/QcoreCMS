@@ -2,8 +2,18 @@
 (function() {
   define(['admin/app'], function(app) {
     app.controller('categoryCtrl', [
-      '$scope', function($scope) {
-        return alert('test');
+      '$scope', '$resource', function($scope, $resource) {
+        var Catgory, actions, catgory;
+        actions = {
+          mulit: {
+            method: 'GET',
+            isArray: true
+          }
+        };
+        Catgory = $resource('/api/category', {}, actions);
+        catgory = Catgory.mulit(function(data) {
+          return console.log(data);
+        });
       }
     ]);
   });

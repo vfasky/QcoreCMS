@@ -8,7 +8,7 @@ from tornado import gen
 from xcat.form import Form, validators, fields
 from app.models import cms
 
-class CategoryAdd(Form):
+class Category(Form):
     '''分类表单'''
     id = fields.HiddenField()
     

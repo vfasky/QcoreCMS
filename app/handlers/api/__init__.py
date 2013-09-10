@@ -32,8 +32,8 @@ class RequestHandler(RequestHandler):
         return msg
 
 
-@route("/api/category.list")
-class CategoryList(RequestHandler):
+@route("/api/category", allow=['admin'])
+class Category(RequestHandler):
 
     @asynchronous
     @gen.engine
@@ -41,13 +41,9 @@ class CategoryList(RequestHandler):
         tree = yield gen.Task(cms.Category.td_tree)
         self.jsonify(data=tree)
 
-
-@route("/api/category.save", allow=['admin'])
-class CategorySave(RequestHandler):
-
     @asynchronous
     @gen.engine
-    @form('app.forms.cms.CategoryAdd')
+    @form('app.forms.cms.Category')
     def post(self): 
         yield gen.Task(self.form.load_field_data)
 
