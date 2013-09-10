@@ -3,7 +3,7 @@
   define(['admin/app'], function(app) {
     app.controller('categoryCtrl', [
       '$scope', '$resource', function($scope, $resource) {
-        var Catgory, actions, catgory;
+        var Catgory, actions;
         actions = {
           mulit: {
             method: 'GET',
@@ -11,9 +11,7 @@
           }
         };
         Catgory = $resource('/api/category', {}, actions);
-        catgory = Catgory.mulit(function(data) {
-          return console.log(data);
-        });
+        $scope.catgorys = Catgory.mulit();
       }
     ]);
   });

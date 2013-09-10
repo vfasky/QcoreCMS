@@ -5,8 +5,7 @@ define ['admin/app'], (app)->
 
         Catgory = $resource('/api/category', {}, actions)
 
-        catgory = Catgory.mulit (data)->
-            console.log data
+        $scope.catgorys = Catgory.mulit() 
 
         return
     ])

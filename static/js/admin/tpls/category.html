@@ -1,1 +1,16 @@
-<div>test</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>name</th>
+            <th>desc</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="v in catgorys">
+            <td>{{v.id}}</td>
+            <td>{{v.icon}} {{v.title}}</td>
+            <td>{{v.desc}}</td>
+        </tr>
+    </tbody>
+</table>
