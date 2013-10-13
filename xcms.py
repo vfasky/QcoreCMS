@@ -5,7 +5,6 @@
 # @Link    : http://vfasky.com
 # @Version : $Id$
 
-import os
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')

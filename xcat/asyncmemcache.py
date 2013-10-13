@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 """
 Example using ClientPool
 ========
@@ -8,27 +8,27 @@ Example using ClientPool
     import tornado.web
     import tornadoasyncmemcache as memcache
     import time
-    
+
     ccs = memcache.ClientPool(['127.0.0.1:11211'], maxclients=100)
-    
+
     class MainHandler(tornado.web.RequestHandler):
       @tornado.web.asynchronous
       def get(self):
         time_str = time.strftime('%Y-%m-%d %H:%M:%S')
         ccs.set('test_data', 'Hello world @ %s' % time_str,
                 callback=self._get_start)
-    
+
       def _get_start(self, data):
         ccs.get('test_data', callback=self._get_end)
-    
+
       def _get_end(self, data):
         self.write(data)
         self.finish()
-    
+
     application = tornado.web.Application([
       (r"/", MainHandler),
     ])
-    
+
     if __name__ == "__main__":
       application.listen(8888)
       tornado.ioloop.IOLoop.instance().start()
@@ -41,7 +41,6 @@ import time
 import types
 from tornado import iostream, ioloop
 from functools import partial
-import collections
 try:
     import cPickle as pickle
 except ImportError:
@@ -60,6 +59,7 @@ class TooManyClients(Exception):
 class ClientPool(object):
 
     CMDS = ('get', 'replace', 'set', 'decr', 'incr', 'delete')
+    _RUQ_ID = 0
 
     def __init__(self,
                  servers,
@@ -79,43 +79,104 @@ class ClientPool(object):
 
         self._servers = servers
         self._args, self._kwargs = args, kwargs
-        self._used = collections.deque()
         self._maxclients = maxclients
         self._mincached = mincached
         self._maxcached = maxcached
 
-        self._clients = collections.deque(self._create_clients(mincached))
+        #self._clients = collections.deque(self._create_clients(mincached))
+        self._clients = self._create_clients(maxclients)
+        self._task_que = self._init_task_que(maxclients)
 
     def _create_clients(self, n):
         assert n >= 0
         return [Client(self._servers, *self._args, **self._kwargs)
                 for x in xrange(n)]
 
+    # 初始化执行队列
+    def _init_task_que(self, n):
+        assert n >= 0
+        que = []
+        for x in xrange(n):
+            que.append({
+                'ix': x,
+                'list': []
+            })
+        return que
+
+    # 取最小任务的队列id
+    def get_min_task_ix(self):
+        min_que = None
+
+        for v in self._task_que:
+            count = len(v['list'])
+            if count == 0:
+                return v['ix']
+            elif None == min_que or min_que['count'] > count:
+                min_que = {
+                    'ix': v['ix'],
+                    'count': count
+                }
+        return min_que['ix']
+
+    # 添加任务到队列
+    def add_task(self, cmd, args, kwargs):
+        ix = self.get_min_task_ix()
+        self._RUQ_ID = self._RUQ_ID + 1
+
+        self._task_que[ix]['list'].append({
+            'id': self._RUQ_ID,
+            'cmd': cmd,
+            'args': args,
+            'kwargs': kwargs,
+            'run': False,
+        })
+        # 马上执行队列
+        if len(self._task_que[ix]['list']) == 1:
+            self.call_client(ix)
+
+        return ix
+
+    # 从指定队列中队任务
+    def get_task(self, ix):
+        for v in self._task_que[ix]['list']:
+            if False == v['run']:
+                v['run'] = True
+                return v
+        return False
+
+    # 调度客户端执行队列
+    def call_client(self, ix):
+        task = self.get_task(ix)
+        if False == task:
+            return
+
+        kwargs = task['kwargs']
+        args = task['args']
+        client = self._clients[ix]
+        kwargs['callback'] = partial(self._que_cb,
+                                     ix=ix,
+                                     task=task,
+                                     callback=kwargs['callback'])
+        getattr(client, task['cmd'])(*args, **kwargs)
+
+    # 执行完任务队列回调
+    def _que_cb(self, response, ix, task, callback, *args, **kwargs):
+        que = self._task_que[ix]
+        que['list'].remove(task)
+        callback(response, *args, **kwargs)
+        # 继续执行
+        if len(que['list']) > 0:
+            self.call_client(ix)
+
     def _do(self, cmd, *args, **kwargs):
-        if not self._clients:
-            if self._maxclients > 0 and (len(self._clients)
-                                         + len(self._used) >= self._maxclients):
-                raise TooManyClients("Max of %d clients is already reached"
-                                     % self._maxclients)
-            self._clients.append(self._create_clients(1)[0])
-        c = self._clients.popleft()
-        kwargs['callback'] = partial(self._gen_cb, c=c, _cb=kwargs['callback'])
-        self._used.append(c)
-        getattr(c, cmd)(*args, **kwargs)
+        self.add_task(cmd, args, kwargs)
+
 
     def __getattr__(self, name):
         if name in self.CMDS:
             return partial(self._do, name)
         raise AttributeError("'%s' object has no attribute '%s'" %
                             (self.__class__.__name__, name))
-
-    def _gen_cb(self, response, c, _cb, *args, **kwargs):
-        self._used.remove(c)
-        if self._maxcached == 0 or self._maxcached > len(self._clients):
-            self._clients.append(c)
-        else:
-            c.disconnect_all()
-        _cb(response, *args, **kwargs)
 
 
 class _Error(Exception):
@@ -126,7 +187,7 @@ class Client(object):
 
     """
     Object representing a pool of memcache servers.
-    
+
     See L{memcache} for an overview.
 
     In all cases where a key is used, the key can be either:
@@ -206,7 +267,7 @@ class Client(object):
             sys.stderr.write("MemCached: %s\n" % str)
 
     def _statlog(self, func):
-        if not self.stats.has_key(func):
+        if func not in self.stats:
             self.stats[func] = 1
         else:
             self.stats[func] += 1
@@ -225,7 +286,7 @@ class Client(object):
                 self.buckets.append(server)
 
     def _get_server(self, key):
-        if type(key) == types.TupleType:
+        if isinstance(key, types.TupleType):
             serverhash = key[0]
             key = key[1]
         else:
@@ -245,7 +306,7 @@ class Client(object):
 
     def delete(self, key, time=0, callback=None):
         '''Deletes a key from the memcache.
-        
+
         @return: Nonzero on success.
         @rtype: int
         '''
@@ -253,7 +314,7 @@ class Client(object):
         if not server:
             self.finish(partial(callback, 0))
         self._statlog('delete')
-        if time != None:
+        if time is not None:
             cmd = "delete %s %d" % (key, time)
         else:
             cmd = "delete %s" % key
@@ -330,7 +391,7 @@ class Client(object):
     def add(self, key, val, time=0, callback=None):
         '''
         Add new key with value.
-        
+
         Like L{set}, but only stores in memcache if the key doesn't already exist.
 
         @return: Nonzero on success.
@@ -340,8 +401,8 @@ class Client(object):
 
     def replace(self, key, val, time=0, callback=None):
         '''Replace existing key with value.
-        
-        Like L{set}, but only stores in memcache if the key already exists.  
+
+        Like L{set}, but only stores in memcache if the key already exists.
         The opposite of L{add}.
 
         @return: Nonzero on success.
@@ -399,7 +460,7 @@ class Client(object):
 
     def get(self, key, callback):
         '''Retrieves a key from the memcache.
-        
+
         @return: The value or None.
         '''
         server, key = self._get_server(key)
@@ -534,7 +595,7 @@ class _Host:
         # Python 2.3-ism:  s.settimeout(1)
         try:
             s.connect((self.ip, self.port))
-        except socket.error, msg:
+        except socket.error as msg:
             self.mark_dead("connect: %s" % msg[1])
             return None
         self.socket = s
