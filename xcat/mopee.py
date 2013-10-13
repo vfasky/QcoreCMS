@@ -115,6 +115,12 @@ WaitAllOps = momoko.WaitAllOps
 class PostgresqlAsyncDatabase(PostgresqlDatabase):
 
     def _connect(self, database, **kwargs):
+        
+        if hasattr(self, '_on_connect'):
+            callback = self._on_connect
+        else:
+            callback = None
+
         return momoko.Pool(
             dsn='dbname=%s user=%s password=%s host=%s port=%s' % (
                 database,
@@ -123,8 +129,14 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
                 kwargs.get('host', 'localhost'),
                 kwargs.get('port', '5432'),
             ),
+            callback=callback,
             size=kwargs.get('size', 10)
         )
+
+
+    def on_connect(self, callback):
+        self._on_connect = callback
+
 
     @gen.engine
     def last_insert_id(self, cursor, model, callback=None):

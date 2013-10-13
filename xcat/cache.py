@@ -11,19 +11,32 @@ __all__ = ['Memcache', 'Mongod']
 import time
 import asyncmemcache
 from tornado import gen
-
+from xcat import config
+from xcat.utils import Json
+from xcat.mopee import *
 
 '''
 基于 memcache 的异步缓存
 ========================
-
 '''
+
+
+class MemcacheModel(AsyncModel):
+    '''
+    存放 memcache 需要持久储存的数据
+    '''
+    class Meta:
+        db_table = '_memcache_data_'
+
+    key = CharField(unique=True, max_length=100)
+    value = TextField(default='{}', help_text="json 后的值")
 
 
 class Memcache(object):
 
     _conn = None
 
+    @gen.engine
     def __init__(self, **kwargs):
         if not kwargs.get('servers', False):
             raise NameError, 'servers syntax'
@@ -33,6 +46,33 @@ class Memcache(object):
                 kwargs['servers'],
                 maxclients=int(kwargs.get('maxclients', 100))
             )
+            # 如果有数据库连接，交需要持久化的数据写入数据库
+            database = config.get('database')
+
+            if database:
+                MemcacheModel._meta.database = database
+                is_sync = False
+
+                def sync():
+                    global is_sync
+                    if is_sync:
+                        return
+
+                    is_sync = True
+                    if False == (yield gen.Task(MemcacheModel.table_exists)):
+                        yield gen.Task(MemcacheModel.create_table)
+                    else:
+                        # 从数据表中读取数据,并写入缓存
+                        data = yield gen.Task(MemcacheModel.select().execute)
+                        for v in data:
+                            self.set(v.key, Json.decode(v.value), 0)
+               
+                if not database.get_conn()._get_connection():
+                    database.on_connect(sync)
+                    database.connect()
+                else:
+                    sync()
+
 
     @gen.engine
     def get(self, key, default=None, callback=None):
@@ -44,9 +84,28 @@ class Memcache(object):
 
     @gen.engine
     def set(self, key, val, left_time=0, callback=None):
+        is_persistence = False
+        if -1 == left_time:
+            is_persistence = True
+            left_time = 0
+
         ret = yield gen.Task(self._conn.set, key, val, left_time)
         if callback:
             callback(ret)
+        
+        # 需要持久化，写入数据表
+        if is_persistence:
+           model = MemcacheModel.select().where(MemcacheModel.key == key)
+           
+           if 1 == (yield gen.Task(model.count)):
+               ar = yield gen.Task(model.get)
+           else:
+               ar = MemcacheModel()
+               ar.key = key
+           
+           ar.value = Json.encode(val)
+           yield gen.Task(ar.save)
+ 
 
     @gen.engine
     def remove(self, key, callback=None):

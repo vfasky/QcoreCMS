@@ -14,10 +14,10 @@ __all__ = [
 ]
 
 import functools
-from utils import Json
+import sys
 from tornado import gen
 from tornado.util import import_object
-from tornado.web import UIModule
+from tornado.web import UIModule, RequestHandler
 
 # 绑定的 app 对象
 _application = None
@@ -98,21 +98,18 @@ def reset(callback=None):
 def get_work_names():
     return _work_plugins
 
+
 # 取可用插件列表
-
-
 def get_list():
     return _list
 
+
 # 取插件的配置
-
-
 def get_config(plugin_name, default={}):
     return _config.get(plugin_name, default)
 
+
 # 设置插件配置
-
-
 @gen.engine
 def set_config(plugin_name, config, callback=None):
     global _config
@@ -132,19 +129,19 @@ def set_config(plugin_name, config, callback=None):
             break
 
     if is_save:
-        yield gen.Task(_application.cache.set, _cache_key, plugin_configs)
+        # 持久化
+        yield gen.Task(_application.cache.set, _cache_key, plugin_configs, -1)
         yield gen.Task(_application.sync_ping)
 
     if callback:
         callback(is_save)
 
 
-'''
-  调用对应的插件
-'''
-
-
 def call(event, that):
+    '''
+      调用对应的插件
+    '''
+
     target = that.__class__.__module__ + '.' + that.__class__.__name__
     handlers = []
     target = target.split('handlers.').pop()
@@ -304,11 +301,11 @@ def format_doc(cls):
         'link': link
     }
 
-# 安装插件
-
 
 @gen.engine
 def install(plugin_name, config=None, callback=None):
+    # 安装插件
+
     register = import_object(str(plugin_name).strip() + '.register')
 
     name = register._handler.__module__ + \
@@ -329,10 +326,10 @@ def install(plugin_name, config=None, callback=None):
     try:
         ui_modules = import_object(plugin_name + '.uimodules')
         for v in dir(ui_modules):
-            if issubclass(getattr(ui_modules, v), UIModule) \
-                and v != 'UIModule':
+            if issubclass(getattr(ui_modules, v), UIModule)\
+               and v != 'UIModule':
                 plugin.add_ui_module(v)
-    except Exception, e:
+    except Exception:
         pass
 
     # 尝试自加加载 handlers.py
@@ -342,10 +339,10 @@ def install(plugin_name, config=None, callback=None):
         for v in dir(handlers):
 
             if issubclass(getattr(handlers, v), RequestHandler) \
-                and v != 'RequestHandler':
+               and v != 'RequestHandler':
 
                 plugin.add_handler(v)
-    except Exception, e:
+    except Exception:
         pass
 
     handlers = []
@@ -373,7 +370,7 @@ def install(plugin_name, config=None, callback=None):
 
     plugin_configs.append(pl)
 
-    yield gen.Task(_application.cache.set, _cache_key, plugin_configs)
+    yield gen.Task(_application.cache.set, _cache_key, plugin_configs, -1)
 
     if _application:
         yield gen.Task(_application.sync_ping)
@@ -396,7 +393,7 @@ def uninstall(plugin_name, callback=None):
         if plugin_data.get('name') == name:
             plugin_configs.remove(plugin_data)
 
-            yield gen.Task(_application.cache.set, _cache_key, plugin_configs)
+            yield gen.Task(_application.cache.set, _cache_key, plugin_configs, -1)
 
             # 通知 application 同步
             if _application:
@@ -450,7 +447,6 @@ class Register(object):
 
 
 class Base(object):
-
     """
       插件的基类
     """
@@ -477,14 +473,12 @@ class Base(object):
       安装时执行
 
     '''
-
     def install(self):
         pass
 
     '''
       卸载时执行
     '''
-
     def uninstall(self):
         pass
 
@@ -499,7 +493,6 @@ class Base(object):
     '''
       添加控制器
     '''
-
     def add_handler(self, handler):
         handler = self.module + '.handlers.' + handler
         handler = import_object(handler)
@@ -509,7 +502,6 @@ class Base(object):
     '''
       添加 UI models
     '''
-
     def add_ui_module(self, ui_module):
         ui_module = self.module + '.uimodules.' + ui_module
         ui_module = import_object(ui_module)
