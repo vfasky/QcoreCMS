@@ -46,6 +46,9 @@ class Form(wtForm):
             formdata = TornadoArgumentsWrapper(formdata)
         super(Form, self).process(formdata, obj, **kwargs)
 
+    def load_field_data(self, callback):
+        callback()
+
     def load_data(self, obj):
         formdata = TornadoArgumentsWrapper(MopeeObjWrapper(obj, self))
         return self.process(formdata)

@@ -113,6 +113,10 @@ class Memcache(object):
         if callback:
             callback(ret)
 
+        yield gen.Task(MemcacheModel.delete()\
+                                    .where(MemcacheModel.key == key)\
+                                    .execute)
+
 
 '''
 基于 asyncmongo 的异步缓存

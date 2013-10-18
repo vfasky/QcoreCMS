@@ -146,11 +146,23 @@ class Category(AsyncModel):
     @gen.engine
     def tree(cls, callback):
         '''返回多维树'''
-        data = yield gen.Task(cls.select().execute)
+        data = yield gen.Task(
+            cls.select(
+                cls.id, cls.parent,
+                cls.title, cls.desc,
+                Table.table
+            ).join(Table).order_by(
+                cls.order.desc()
+            ).execute
+        )
+
         all_tree = []
         root_tree = []
+
         for v in data:
             item = v._data
+            item['table'] = '%s%s' % (table_prefix, v.table.table)
+
             all_tree.append(item)
             if item['parent'] == 0:
                 root_tree.append(item)

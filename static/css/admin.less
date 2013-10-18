@@ -1,5 +1,6 @@
 body {
     padding: 30px;
+    background: #E7E7E7;
 }
 
 .navbar {
@@ -39,4 +40,26 @@ body {
     margin-bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+.navbar-default{
+	background: #363C46;
+    border: none;
+    //box-shadow: 0 0 2px #666666;
+    color:#fff;
+    
+    .navbar-brand{
+        color:#fff;
+    }
+ }
+.navbar-default .navbar-nav > li > a {
+    color:#fff;
+
+    &:hover{
+        color:#5e5e5e;
+    }
+}
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    background-color: #0088CC;
+    color:#fff;
 }

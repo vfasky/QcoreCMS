@@ -1,16 +1,35 @@
-<table class="table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>name</th>
-            <th>desc</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="v in catgorys">
-            <td>{{v.id}}</td>
-            <td>{{v.icon}} {{v.title}}</td>
-            <td>{{v.desc}}</td>
-        </tr>
-    </tbody>
-</table>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">分类管理</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>名称</th>
+                    <th>描述</th>
+                    <th>数据表</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="v in catgorys">
+                    <td>{{v.id}}</td>
+                    <td>{{v.icon}} {{v.title}}</td>
+                    <td>{{v.desc}}</td>
+                    <td>{{v.table}}</td>
+                    <td>
+                        <button tool-tip="编辑" type="button" class="btn btn-default btn-sm">
+                            <i class="icon-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div load-form="app.forms.cms.Category"></div>

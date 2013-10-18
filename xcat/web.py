@@ -52,7 +52,7 @@ def form(form_name):
             if hasattr(self, 'locale') and hasattr(self.locale, 'code'):
                 locale_code = self.locale.code
             self.form = import_object(
-                form_class)(self.request.arguments, locale_code)
+                form_class)(self.request.arguments, locale_code=locale_code)
             self.form.xsrf_form_html = self.xsrf_form_html
             return method(self, *args, **kwargs)
 
@@ -370,7 +370,7 @@ def sync_app(method):
             # print sync_id
             if sync_id != self._sync_id:
                 # print '同步'
-                ret = yield gen.Task(self.sync, sync_id)
+                yield gen.Task(self.sync, sync_id)
         method(self, request)
 
     return wrapper
