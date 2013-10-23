@@ -69,7 +69,7 @@ class Memcache(object):
                
                 if not database.get_conn()._get_connection():
                     database.on_connect(sync)
-                    database.connect()
+                    #database.connect()
                 else:
                     sync()
 

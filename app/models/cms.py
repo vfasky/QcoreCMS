@@ -131,7 +131,12 @@ class Category(AsyncModel):
 
         def get_childs(item):
             v = item
-            v['icon'] = '-'.join(range(0, v['level'])) + '|'
+            icon = [' -']
+            for n in range(0, v['level']):
+                icon.append(' -')
+
+            v['icon'] = ''.join(icon)
+
             child_tree = v.pop('child_tree')
             td_tree_list.append(v)
             for c in child_tree:
@@ -146,22 +151,22 @@ class Category(AsyncModel):
     @gen.engine
     def tree(cls, callback):
         '''返回多维树'''
-        data = yield gen.Task(
-            cls.select(
-                cls.id, cls.parent,
-                cls.title, cls.desc,
-                Table.table
-            ).join(Table).order_by(
-                cls.order.desc()
-            ).execute
+        ar = cls.select(
+            cls.id, cls.parent,
+            cls.title, cls.desc,
+            cls.table, Table.table
+        ).join(Table).order_by(
+            cls.order.desc()
         )
+
+        data = yield gen.Task(ar.execute)
 
         all_tree = []
         root_tree = []
 
         for v in data:
             item = v._data
-            item['table'] = '%s%s' % (table_prefix, v.table.table)
+            item['table_name'] = '%s%s' % (table_prefix, v.table.table)
 
             all_tree.append(item)
             if item['parent'] == 0:

@@ -1,5 +1,5 @@
 
-<div class="panel panel-default">
+<div class="panel panel-default" ng-show="isList">
     <div class="panel-heading">
       <h3 class="panel-title">分类管理</h3>
     </div>
@@ -12,16 +12,16 @@
                     <th>描述</th>
                     <th>数据表</th>
                     <th>操作</th>
-                </tr>
+                </tr> 
             </thead>
             <tbody>
                 <tr ng-repeat="v in catgorys">
                     <td>{{v.id}}</td>
                     <td>{{v.icon}} {{v.title}}</td>
                     <td>{{v.desc}}</td>
-                    <td>{{v.table}}</td>
+                    <td>{{v.table_name}}</td>
                     <td>
-                        <button tool-tip="编辑" type="button" class="btn btn-default btn-sm">
+                        <button ng-click="edit(v)" tool-tip="编辑" type="button" class="btn btn-default btn-sm">
                             <i class="icon-edit"></i>
                         </button>
                     </td>
@@ -32,4 +32,17 @@
     </div>
 </div>
 
-<div load-form="app.forms.cms.Category"></div>
+<div class="panel panel-default" ng-show="isList == false">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+          <button ng-click="isList = true" class="btn btn-default btn-sm">
+            <i class="icon-reply"></i>
+            分类管理
+          </button>
+
+      </h3>
+    </div>
+    <div class="panel-body" load-form="app.forms.cms.Category">
+    </div>
+</div>
+

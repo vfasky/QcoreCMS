@@ -41,10 +41,10 @@ class Category(RequestHandler):
         tree = yield gen.Task(cms.Category.td_tree)
         self.jsonify(data=tree)
 
+    @form('app.forms.cms.Category')
     @asynchronous
     @gen.engine
-    @form('app.forms.cms.Category')
-    def post(self): 
+    def post(self):
         yield gen.Task(self.form.load_field_data)
 
         if not self.form.validate():
@@ -54,7 +54,7 @@ class Category(RequestHandler):
             return
 
         post = self.form.data
-
+              
         if post['id']:
             category_ar = cms.Category.select()\
                 .where(cms.Category.id == post['id'])
@@ -71,7 +71,8 @@ class Category(RequestHandler):
         if post['parent'] != '0':
             #检查上级是否存在
             category_ar = cms.Category.select()\
-                .where(cms.Category.id == post['parent'])
+                .where(cms.Category.id == post['parent'])\
+                .where(cms.Category.id != post['id'])
             
             if 0 == (yield gen.Task(category_ar.count)):
                 self.jsonify(
@@ -95,15 +96,16 @@ class Category(RequestHandler):
                     msg='data is has')
                 return
 
-            category = cms.Category(**post)
-            yield gen.Task(category.save)
+            category_model = cms.Category(**post)
+            yield gen.Task(category_model.save)
         else:
             self.form.data_to_model(category_model)
+            category_model.table = yield gen.Task(
+                cms.Table.select().where(cms.Table.id == post['table']).get
+            )
+
             yield gen.Task(category_model.save)
                     
-        self.jsonify(data=category._data)
+        self.jsonify(data=category_model._data)
         
-        
-
-
 

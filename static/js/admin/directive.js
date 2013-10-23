@@ -18,20 +18,33 @@
       }
     ]);
     app.directive('loadForm', [
-      '$http', '$compile', function($http, $compile) {
+      '$http', '$compile', '$timeout', function($http, $compile, $timeout) {
         return function(scope, element, attr) {
           var el, formName;
           formName = attr.loadForm;
           el = $(element);
           el.removeAttr('load-form');
           return $http.get("/admin/form?form=" + formName).success(function(formHtml) {
-            var callbackName;
+            var actionName, actionNames, actions, callbackName, submitAction;
+            actions = formName.split('.');
+            actionNames = [];
+            $.each(actions, function(k, v) {
+              return actionNames.push(v.toLowerCase().replace(/(?=\b)\w/g, function(e) {
+                return e.toUpperCase();
+              }));
+            });
+            actionName = actionNames.join('');
             el.html(formHtml);
+            submitAction = "onSubmit" + actionName;
+            if ($.isFunction(scope[submitAction])) {
+              el.find('form').attr('ng-submit', "" + submitAction + "()");
+            }
             $compile(el)(scope);
-            callbackName = 'on_load_' + formName.replace(/\./g, '_');
-            console.log(callbackName);
+            callbackName = 'onLoad' + actionName;
             if ($.isFunction(scope[callbackName])) {
-              return scope[callbackName](el);
+              return $timeout(function() {
+                return scope[callbackName](el);
+              }, 0);
             }
           });
         };

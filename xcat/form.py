@@ -54,9 +54,11 @@ class Form(wtForm):
         return self.process(formdata)
 
     def data_to_model(self, model):
+        #print self.data
         for v in self.data:
             if hasattr(model, v):
                 setattr(model, v, self.data[v])
+                #print v, getattr(model, v)
 
         return model
 

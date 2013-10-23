@@ -31,8 +31,8 @@ class Index(RequestHandler):
 class Form(RequestHandler):
 
     '''取表单的html结构'''
-    @gen.engine
     @asynchronous
+    @gen.engine
     def get(self):
         form_name = self.get_argument('form')
         if not form_name:
@@ -50,7 +50,7 @@ class Form(RequestHandler):
             return
         
         form_obj.xsrf_form_html = self.xsrf_form_html
-        form_obj = yield gen.Task(form_obj.load_field_data)
+        yield gen.Task(form_obj.load_field_data)
         form_obj.load_data(self.request.arguments)
 
         self.render('admin/form.html', form=form_obj)

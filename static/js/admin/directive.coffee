@@ -14,7 +14,7 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
 
     ])
 
-    app.directive('loadForm', ['$http', '$compile', ($http, $compile)->
+    app.directive('loadForm', ['$http', '$compile', '$timeout', ($http, $compile, $timeout)->
         (scope, element, attr) ->
             formName = attr.loadForm
             el       = $(element)
@@ -22,12 +22,31 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
             el.removeAttr('load-form')
 
             $http.get("/admin/form?form=#{formName}").success (formHtml)->
-                el.html formHtml
+                #actionName = formName.replace(/\./g, '_')
+                actions     = formName.split('.')
+                actionNames = []
+                $.each(actions, (k, v) ->
+                    actionNames.push v.toLowerCase().replace(/(?=\b)\w/g, (e) ->
+                        e.toUpperCase()
+                    )
+                )
+                actionName = actionNames.join('')
+
+                el.html(formHtml)
+                # 表单提交时的处理函数
+                submitAction = "onSubmit#{actionName}"
+
+                if $.isFunction scope[submitAction]
+                    el.find('form').attr('ng-submit', "#{submitAction}()")
+
                 $compile(el)(scope)
-                callbackName = 'on_load_' + formName.replace(/\./g, '_')
-                console.log callbackName
+
+                callbackName = 'onLoad' + actionName
+
                 if $.isFunction scope[callbackName]
-                    scope[callbackName](el)
+                    $timeout(->
+                        scope[callbackName](el)
+                    , 0)
     ])
 
     return app

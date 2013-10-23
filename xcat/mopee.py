@@ -203,13 +203,14 @@ class PostgresqlAsyncDatabase(PostgresqlDatabase):
     @gen.engine
     def execute_sql(self, sql, params=None, require_commit=True, callback=None):
         params = params or ()
-        if require_commit and self.get_autocommit():
-            cursors = yield momoko.Op(self.get_conn().transaction, [(sql, params)])
+        #if require_commit and self.get_autocommit():
+            #cursors = yield momoko.Op(self.get_conn().transaction, [(sql, params)])
 
-            for i, cursor in enumerate(cursors):
-                pass
-        else:
-            cursor = yield momoko.Op(self.get_conn().execute, sql, params)
+            #for i, cursor in enumerate(cursors):
+                #pass
+        #else:
+            #cursor = yield momoko.Op(self.get_conn().execute, sql, params)
+        cursor = yield momoko.Op(self.get_conn().execute, sql, params)
 
         if callback and cursor:
             # print cursor

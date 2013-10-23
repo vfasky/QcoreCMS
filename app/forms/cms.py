@@ -38,17 +38,16 @@ class Category(Form):
 
     @gen.engine
     def load_field_data(self, callback=None):
-        tables = yield gen.Task(cms.Table.select().execute)
-        data = []
-        for v in tables:
-            data.append((str(v.id), v.title))
-        self.table.choices = data
-
         tree = yield gen.Task(cms.Category.td_tree)
         data = [('0', 'root')]
         for v in tree:
             data.append((str(v['id']), '-%s %s' % (v['icon'], v['title'])))
         self.parent.choices = data
 
-        callback and callback(self)
+        tables = yield gen.Task(cms.Table.select().execute)
+        data = []
+        for v in tables:
+            data.append((str(v.id), v.title))
+        self.table.choices = data
 
+        callback and callback()

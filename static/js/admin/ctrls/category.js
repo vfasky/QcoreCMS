@@ -2,18 +2,48 @@
 (function() {
   define(['admin/directive'], function(app) {
     app.controller('categoryCtrl', [
-      '$scope', '$resource', function($scope, $resource) {
+      '$scope', '$resource', '$http', function($scope, $resource, $http) {
         var Catgory, actions;
         actions = {
+          save: {
+            method: 'POST'
+          },
           mulit: {
             method: 'GET',
             isArray: true
           }
         };
         Catgory = $resource('/api/category', {}, actions);
+        $scope.isList = true;
         $scope.catgorys = Catgory.mulit();
-        $scope.on_load_app_forms_cms_Category = function(el) {
-          return console.log(el);
+        $scope.onSubmitAppFormsCmsCategory = function() {
+          var formEl, postData;
+          formEl = this.formEl;
+          postData = {};
+          formEl.find('[name]').each(function() {
+            var self;
+            self = $(this);
+            return postData[self.attr('name')] = self.val();
+          });
+          return Catgory.save(postData, function() {
+            $scope.isList = true;
+            return $scope.catgorys = Catgory.mulit();
+          });
+        };
+        return $scope.onLoadAppFormsCmsCategory = function(el) {
+          var formEl;
+          formEl = el.find('form');
+          $scope.formEl = formEl;
+          $scope.edit = function(val) {
+            $scope.isList = false;
+            return formEl.find('[name]').each(function() {
+              var self;
+              self = $(this);
+              if (val[self.attr('name')]) {
+                return self.val(val[self.attr('name')]);
+              }
+            });
+          };
         };
       }
     ]);

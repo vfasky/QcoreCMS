@@ -1,5 +1,5 @@
-{% macro render_form(form, action="", submit_title="save", method="post", legend=None, class="") %}
-    <form action="{{action}}" method="{{method}}" class="{{class}}">
+{% macro render_form(form, action="", submit_title="save", method="post", legend=None, class="form-horizontal") %}
+    <form action="{{action}}" role="form" method="{{method}}" class="{{class}}">
         {{ form.xsrf_form_html() }}
         <fieldset {% if class %}class="{{class}}"{% endif %}>
             {% if legend %}
@@ -18,12 +18,12 @@
 {% endmacro %}
 
 {%- macro form_field_label(field) -%}
-    <label class="field-label">
+    <label class="col-lg-2 control-label">
     {%- if field.flags.required -%}
         <span class="abbr" title="此项必填">*</span>
     {%- endif -%}
     {{ field.label.text }}
-    </lable>
+    </label>
 {% endmacro %}
 
 {%- macro form_field_description(field) -%}
@@ -53,31 +53,35 @@
 {%- endmacro -%}
 
 {%- macro action_buttons(submit_title, submit_class="btn btn-primary") -%}
-    <div class="form-actions">
-        <button type="submit" class="{{submit_class}}">{{submit_title}}</button>
+    <div class="form-group">
+        <div class="col-lg-offset-2 col-lg-10">
+            <button type="submit" class="{{submit_class}}">{{submit_title}}</button>
+        </div>
     
     </div>
 {%- endmacro -%}
 
 {%- macro form_field(field) -%}
-  <div class="control-group {% if field.errors %}error{% endif %}">
+  <div class="form-group {% if field.errors %}error{% endif %}">
     {% if field.type == 'HiddenField' %}
         {{ field() }}
         {{ form_field_errors(field) }}
     {% else %}
+
         {% if field.type == 'BooleanField' %}
             {{ form_field_boolean(field, **kwargs) }}
-        {% else%}
+        {% else %}
             {{ form_field_label(field) }}
-            <div class="controls" id="{{field.id}}-div">
+            <div class="col-lg-10">
                 {% if field.type == 'RadioField' %}
                     {{ field(class='radio-group', **kwargs) }}
                 {% else %}
-                    {{ field(**kwargs) }}
+                    {{ field(class='form-control', **kwargs) }}
                 {% endif %}
                 {{ form_field_description(field) }}
                 {{ form_field_errors(field) }}
             </div>
+
         {% endif %}
     {% endif %}
   </div>

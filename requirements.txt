@@ -1,6 +1,6 @@
 tornado
 peewee
-Momoko
+momoko
 Jinja2
 wtforms
 arrow
