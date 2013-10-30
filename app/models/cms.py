@@ -174,13 +174,14 @@ class Category(AsyncModel):
                 all_tree.remove(item)
 
         def get_childs(item):
-            child_tree = []
+            child_tree = 'child_tree' in item and item['child_tree'] or []
             for v in all_tree:
+
                 if v['parent'] == item['id']:
-                    all_tree.remove(v)
                     v['level'] = item['level'] + 1
                     v['child_tree'] = get_childs(v)
                     child_tree.append(v)
+
             return child_tree
 
         tree_list = []

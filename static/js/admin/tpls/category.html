@@ -1,10 +1,20 @@
-
 <div class="panel panel-default" ng-show="isList">
     <div class="panel-heading">
-      <h3 class="panel-title">分类管理</h3>
+
+        <h3 class="panel-title row">
+            <div class="col-md-4">分类管理</div>
+            
+            <div class="col-md-4 col-md-offset-4 text-right">
+                <button ng-click="add()" class="btn btn-default btn-sm">
+                    <i class="icon-plus"></i>
+                    新增
+                </button>
+            </div>
+
+        </h3>
     </div>
     <div class="panel-body">
-        <table class="table table-striped">
+        <table class="table table-striped ">
             <thead>
                 <tr>
                     <th>#</th>
@@ -12,12 +22,12 @@
                     <th>描述</th>
                     <th>数据表</th>
                     <th>操作</th>
-                </tr> 
+                </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="v in catgorys">
                     <td>{{v.id}}</td>
-                    <td>{{v.icon}} {{v.title}}</td>
+                    <td><i class="icon-ellipsis-vertical"></i>{{v.icon}} {{v.title}}</td>
                     <td>{{v.desc}}</td>
                     <td>{{v.table_name}}</td>
                     <td>
@@ -34,15 +44,14 @@
 
 <div class="panel panel-default" ng-show="isList == false">
     <div class="panel-heading">
-      <h3 class="panel-title">
-          <button ng-click="isList = true" class="btn btn-default btn-sm">
-            <i class="icon-reply"></i>
-            分类管理
-          </button>
+        <h3 class="panel-title">
+            <button ng-click="isList = true" class="btn btn-default btn-sm">
+                <i class="icon-reply"></i>
+                分类管理
+            </button>
 
-      </h3>
+        </h3>
     </div>
     <div class="panel-body" load-form="app.forms.cms.Category">
     </div>
 </div>
-

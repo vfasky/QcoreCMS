@@ -1,6 +1,8 @@
-define ['jQuery', 'admin/app', 'admin/ctrls/category'], ($, app, categoryCtrl)->
+define ['admin/provider', 'admin/ctrls/category'], (app, categoryCtrl)->
     tplPath = '/static/js/admin/tpls'
-    app.config ['$routeProvider', '$httpProvider', ($routeProvider, $httpProvider)->
+
+    app.config ['$routeProvider', '$httpProvider', 'MsgProvider' 
+      ($routeProvider, $httpProvider, MsgProvider)->
         $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
         $httpProvider.defaults.transformRequest = (data) ->
@@ -12,8 +14,8 @@ define ['jQuery', 'admin/app', 'admin/ctrls/category'], ($, app, categoryCtrl)->
                 if json.success
                     return json.data
                 else
-                    #todo error msg
-                    console.log json.msg
+                    MsgProvider.$get().error json.msg
+                    #console.log json.msg
                     return null
             else
                 return data
@@ -24,5 +26,8 @@ define ['jQuery', 'admin/app', 'admin/ctrls/category'], ($, app, categoryCtrl)->
             templateUrl: "#{tplPath}/category.html"
         )
     ]
+
+ 
+
+    app
     
-    return

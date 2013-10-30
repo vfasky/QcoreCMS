@@ -62,7 +62,7 @@
 {%- endmacro -%}
 
 {%- macro form_field(field) -%}
-  <div class="form-group {% if field.errors %}error{% endif %}">
+  <div class="form-group {% if field.errors %}has-error{% endif %}">
     {% if field.type == 'HiddenField' %}
         {{ field() }}
         {{ form_field_errors(field) }}
@@ -75,6 +75,8 @@
             <div class="col-lg-10">
                 {% if field.type == 'RadioField' %}
                     {{ field(class='radio-group', **kwargs) }}
+                {% elif field.flags.required %}
+                    {{ field(class='form-control', required='', **kwargs) }}
                 {% else %}
                     {{ field(class='form-control', **kwargs) }}
                 {% endif %}

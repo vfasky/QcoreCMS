@@ -55,7 +55,7 @@ class Category(RequestHandler):
 
         post = self.form.data
               
-        if post['id']:
+        if post['id'] != '':
             category_ar = cms.Category.select()\
                 .where(cms.Category.id == post['id'])
 
@@ -72,7 +72,9 @@ class Category(RequestHandler):
             #检查上级是否存在
             category_ar = cms.Category.select()\
                 .where(cms.Category.id == post['parent'])\
-                .where(cms.Category.id != post['id'])
+
+            if post['id'] != '':
+                category_ar = category_ar.where(cms.Category.id != post['id'])
             
             if 0 == (yield gen.Task(category_ar.count)):
                 self.jsonify(
@@ -95,8 +97,14 @@ class Category(RequestHandler):
                     success=False,
                     msg='data is has')
                 return
-
+            
+            del post['id']
             category_model = cms.Category(**post)
+
+            category_model.table = yield gen.Task(
+                cms.Table.select().where(cms.Table.id == post['table']).get
+            )
+
             yield gen.Task(category_model.save)
         else:
             self.form.data_to_model(category_model)

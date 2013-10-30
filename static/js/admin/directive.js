@@ -28,6 +28,7 @@
             var actionName, actionNames, actions, callbackName, submitAction;
             actions = formName.split('.');
             actionNames = [];
+            formName = false;
             $.each(actions, function(k, v) {
               return actionNames.push(v.toLowerCase().replace(/(?=\b)\w/g, function(e) {
                 return e.toUpperCase();
@@ -38,6 +39,20 @@
             submitAction = "onSubmit" + actionName;
             if ($.isFunction(scope[submitAction])) {
               el.find('form').attr('ng-submit', "" + submitAction + "()");
+            }
+            if (scope["_" + actionName + "Name"]) {
+              formName = scope["_" + actionName + "Name"];
+              el.find('form').attr('name', formName);
+              el.find('.form-group').each(function() {
+                var errEl, groupEl, inputName, nameEl;
+                groupEl = $(this);
+                nameEl = groupEl.find('[required]');
+                if (nameEl.length > 0) {
+                  inputName = nameEl.eq(0).attr('name');
+                  errEl = $("<div class=\"alert alert-danger\" ng-show=\"" + formName + "." + inputName + ".$error.required\">Required!</div>");
+                  return nameEl.after(errEl);
+                }
+              });
             }
             $compile(el)(scope);
             callbackName = 'onLoad' + actionName;

@@ -2,8 +2,9 @@
 (function() {
   define(['admin/directive'], function(app) {
     app.controller('categoryCtrl', [
-      '$scope', '$resource', '$http', function($scope, $resource, $http) {
+      '$scope', '$resource', '$http', 'Msg', function($scope, $resource, $http, Msg) {
         var Catgory, actions;
+        Msg.alert('hello word');
         actions = {
           save: {
             method: 'POST'
@@ -16,6 +17,7 @@
         Catgory = $resource('/api/category', {}, actions);
         $scope.isList = true;
         $scope.catgorys = Catgory.mulit();
+        $scope._AppFormsCmsCategoryName = 'categoryFrom';
         $scope.onSubmitAppFormsCmsCategory = function() {
           var formEl, postData;
           formEl = this.formEl;
@@ -30,20 +32,29 @@
             return $scope.catgorys = Catgory.mulit();
           });
         };
+        $scope.edit = function(val) {
+          var formEl;
+          formEl = this.formEl;
+          $scope.isList = false;
+          return formEl.find('[name]').each(function() {
+            var self;
+            self = $(this);
+            if (val[self.attr('name')]) {
+              return self.val(val[self.attr('name')]);
+            }
+          });
+        };
+        $scope.add = function() {
+          this.formEl[0].reset();
+          this.formEl.find('[type=hidden]').each(function() {
+            return $(this).val('');
+          });
+          return $scope.isList = false;
+        };
         return $scope.onLoadAppFormsCmsCategory = function(el) {
           var formEl;
           formEl = el.find('form');
-          $scope.formEl = formEl;
-          $scope.edit = function(val) {
-            $scope.isList = false;
-            return formEl.find('[name]').each(function() {
-              var self;
-              self = $(this);
-              if (val[self.attr('name')]) {
-                return self.val(val[self.attr('name')]);
-              }
-            });
-          };
+          return $scope.formEl = formEl;
         };
       }
     ]);
