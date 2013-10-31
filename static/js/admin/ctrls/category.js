@@ -3,8 +3,7 @@
   define(['admin/directive'], function(app) {
     app.controller('categoryCtrl', [
       '$scope', '$resource', '$http', 'Msg', function($scope, $resource, $http, Msg) {
-        var Catgory, actions;
-        Msg.alert('hello word');
+        var Catgory, actions, getFormField, _form_field;
         actions = {
           save: {
             method: 'POST'
@@ -17,44 +16,71 @@
         Catgory = $resource('/api/category', {}, actions);
         $scope.isList = true;
         $scope.catgorys = Catgory.mulit();
-        $scope._AppFormsCmsCategoryName = 'categoryFrom';
-        $scope.onSubmitAppFormsCmsCategory = function() {
-          var formEl, postData;
-          formEl = this.formEl;
-          postData = {};
-          formEl.find('[name]').each(function() {
-            var self;
-            self = $(this);
-            return postData[self.attr('name')] = self.val();
-          });
-          return Catgory.save(postData, function() {
-            $scope.isList = true;
-            return $scope.catgorys = Catgory.mulit();
-          });
-        };
-        $scope.edit = function(val) {
-          var formEl;
-          formEl = this.formEl;
-          $scope.isList = false;
-          return formEl.find('[name]').each(function() {
-            var self;
-            self = $(this);
-            if (val[self.attr('name')]) {
-              return self.val(val[self.attr('name')]);
+        _form_field = [];
+        getFormField = function(callback) {
+          return $http.get('/api/get.form', {
+            params: {
+              form: 'app.forms.cms.Category'
+            }
+          }).success(function(data) {
+            _form_field = data.form;
+            $scope.form = angular.copy(_form_field);
+            if (angular.isFunction(callback)) {
+              return callback();
             }
           });
         };
-        $scope.add = function() {
-          this.formEl[0].reset();
-          this.formEl.find('[type=hidden]').each(function() {
-            return $(this).val('');
+        getFormField();
+        $scope.submitAct = function() {
+          var postData;
+          postData = {};
+          angular.forEach($scope.form, function(field) {
+            return postData[field.name] = field.data;
           });
-          return $scope.isList = false;
+          return Catgory.save(postData, function(ret) {
+            $scope.catgorys = Catgory.mulit();
+            return getFormField(function() {
+              return $scope.isList = true;
+            });
+          });
         };
-        return $scope.onLoadAppFormsCmsCategory = function(el) {
-          var formEl;
-          formEl = el.find('form');
-          return $scope.formEl = formEl;
+        $scope.edit = function(val) {
+          $scope.isList = false;
+          $scope.form = angular.copy(_form_field);
+          return angular.forEach($scope.form, function(field) {
+            var fieldLevel, isRemove, ix, removeCount;
+            if (field.name === 'table') {
+              field.disabled = true;
+            } else if (field.name === 'parent') {
+              fieldLevel = -1;
+              ix = -1;
+              removeCount = 1;
+              isRemove = false;
+              angular.forEach(field.choices, function(v, k) {
+                var level;
+                level = $.trim(v.label).split('-').length - 1;
+                if (v.value.toString() === val.id.toString()) {
+                  fieldLevel = level;
+                  isRemove = true;
+                  return ix = k;
+                } else if (level <= fieldLevel && fieldLevel !== -1) {
+                  return isRemove = false;
+                } else if (isRemove && fieldLevel !== -1 && level > fieldLevel) {
+                  return removeCount = removeCount + 1;
+                }
+              });
+              if (ix !== -1) {
+                field.choices.splice(ix, removeCount);
+              }
+            }
+            if (val[field.name]) {
+              return field.data = val[field.name];
+            }
+          });
+        };
+        return $scope.add = function() {
+          $scope.isList = false;
+          return $scope.form = angular.copy(_form_field);
         };
       }
     ]);

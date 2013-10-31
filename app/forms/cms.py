@@ -41,7 +41,7 @@ class Category(Form):
         tree = yield gen.Task(cms.Category.td_tree)
         data = [('0', 'root')]
         for v in tree:
-            data.append((str(v['id']), '-%s %s' % (v['icon'], v['title'])))
+            data.append((str(v['id']), '%s %s' % (v['icon'], v['title'])))
         self.parent.choices = data
 
         tables = yield gen.Task(cms.Table.select().execute)

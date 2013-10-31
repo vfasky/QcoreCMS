@@ -27,7 +27,7 @@
             <tbody>
                 <tr ng-repeat="v in catgorys">
                     <td>{{v.id}}</td>
-                    <td><i class="icon-ellipsis-vertical"></i>{{v.icon}} {{v.title}}</td>
+                    <td> | {{v.icon}} &nbsp; {{v.title}}</td>
                     <td>{{v.desc}}</td>
                     <td>{{v.table_name}}</td>
                     <td>
@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<div class="panel panel-default" ng-show="isList == false">
+<div class="panel panel-default" ng-show="!isList">
     <div class="panel-heading">
         <h3 class="panel-title">
             <button ng-click="isList = true" class="btn btn-default btn-sm">
@@ -52,6 +52,5 @@
 
         </h3>
     </div>
-    <div class="panel-body" load-form="app.forms.cms.Category">
-    </div>
+    <div class="panel-body" submit-act="submitAct()" wtforms="form"></div>
 </div>

@@ -17,51 +17,17 @@
         };
       }
     ]);
-    app.directive('loadForm', [
-      '$http', '$compile', '$timeout', function($http, $compile, $timeout) {
+    app.directive('wtforms', [
+      '$compile', '$timeout', function($compile, $timeout) {
         return function(scope, element, attr) {
-          var el, formName;
-          formName = attr.loadForm;
+          var el, formEl, modelName, submitAct, tpl, _ref, _ref1;
+          modelName = (_ref = attr.wtforms) != null ? _ref : 'form';
           el = $(element);
-          el.removeAttr('load-form');
-          return $http.get("/admin/form?form=" + formName).success(function(formHtml) {
-            var actionName, actionNames, actions, callbackName, submitAction;
-            actions = formName.split('.');
-            actionNames = [];
-            formName = false;
-            $.each(actions, function(k, v) {
-              return actionNames.push(v.toLowerCase().replace(/(?=\b)\w/g, function(e) {
-                return e.toUpperCase();
-              }));
-            });
-            actionName = actionNames.join('');
-            el.html(formHtml);
-            submitAction = "onSubmit" + actionName;
-            if ($.isFunction(scope[submitAction])) {
-              el.find('form').attr('ng-submit', "" + submitAction + "()");
-            }
-            if (scope["_" + actionName + "Name"]) {
-              formName = scope["_" + actionName + "Name"];
-              el.find('form').attr('name', formName);
-              el.find('.form-group').each(function() {
-                var errEl, groupEl, inputName, nameEl;
-                groupEl = $(this);
-                nameEl = groupEl.find('[required]');
-                if (nameEl.length > 0) {
-                  inputName = nameEl.eq(0).attr('name');
-                  errEl = $("<div class=\"alert alert-danger\" ng-show=\"" + formName + "." + inputName + ".$error.required\">Required!</div>");
-                  return nameEl.after(errEl);
-                }
-              });
-            }
-            $compile(el)(scope);
-            callbackName = 'onLoad' + actionName;
-            if ($.isFunction(scope[callbackName])) {
-              return $timeout(function() {
-                return scope[callbackName](el);
-              }, 0);
-            }
-          });
+          submitAct = (_ref1 = attr.submitAct) != null ? _ref1 : '';
+          tpl = "                <form method=\"post\" name=\"" + modelName + "\" ng-submit=\"" + submitAct + "\" class=\"form-horizontal\" role=\"form\">                    <div ng-repeat=\"field in " + modelName + "\">                            <div ng-if=\"field.type == 'HiddenField'\">                                <input type=\"hidden\" name=\"{{field.name}}\" ng-model=\"field.data\">                            </div>                            <div class=\"form-group\" ng-if=\"field.type == 'TextField'\">                                <label for=\"wt-" + modelName + "-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required>                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\">                                </div>                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>                                </div>                            </div>                            <div class=\"form-group\" ng-if=\"field.type == 'SelectField'\">                                <label for=\"wt-" + modelName + "-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">                                    <select id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" required>                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">                                            {{v.label}}                                        </option>                                    </select>                                </div>                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">                                    <select id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">                                            {{v.label}}                                        </option>                                    </select>                                </div>                            </div>                                                </div>                    <div class=\"form-group\">                        <div class=\"col-sm-offset-2 col-sm-10\">                            <button type=\"submit\" class=\"btn btn-primary\">                                保存                            </button>                        </div>                    </div>                </form>            ";
+          formEl = $(tpl);
+          formEl.appendTo(el);
+          return $compile(formEl[0])(scope);
         };
       }
     ]);

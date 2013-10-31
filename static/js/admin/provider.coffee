@@ -1,34 +1,33 @@
 define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
-    _msgEl = $ "<div></div>" 
+
+    _msgWrapEl = $ '
+        <div class="row"><div class="col-md-4 col-md-offset-4 msg-el"></div></div>
+    '
+    _msgEl = _msgWrapEl.find('.msg-el')
+
+    _msgWrapEl.css 
+        zIndex: 1500
 
     _msgEl.css 
-        position: 'absolute'
-        width: 200
-        top: 2
-        left: '50%'
-        marginLeft: -200
-        zIndex: 1500
+        position: 'relative'
 
     app.provider 'Msg', ->
         Msg = {}
         Msg.pushMsg = (msg, type='warning') ->
             el = $ "
             <div class=\"alert alert-#{type}\">
-                <button type=\"button\" class=\"close\">&times;</button>
+                <button type=\"button\" data-dismiss=\"alert\" aria-hidden=\"true\" class=\"close\">&times;</button>
                 #{msg}
             </div>"
+
+            el.css 
+                position: 'absolute'
+                width: '100%'
+                zIndex: 1500
 
             time = setTimeout ->
                 el.remove()
             , 3000
-
-            el.on('click', 'button.close', ->
-                if time
-                    clearTimeout time
-
-                el.remove()
-                false
-            )
 
             el.appendTo _msgEl
 
@@ -45,6 +44,6 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
 
         this.$get = -> Msg
 
-    $ -> _msgEl.appendTo 'body'
+    $ -> _msgWrapEl.prependTo 'body'
 
     app

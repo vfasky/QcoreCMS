@@ -1,7 +1,6 @@
 define ['admin/directive'], (app)->
     app.controller('categoryCtrl' , ['$scope', '$resource', '$http', 'Msg',
     ($scope, $resource, $http, Msg)->
-        Msg.alert 'hello word'
         actions =
             save: method: 'POST'
             mulit: method: 'GET', isArray: true
@@ -10,43 +9,80 @@ define ['admin/directive'], (app)->
 
         $scope.isList   = true
         $scope.catgorys = Catgory.mulit()
-        $scope._AppFormsCmsCategoryName = 'categoryFrom'
 
-          
-        $scope.onSubmitAppFormsCmsCategory = ->
-            formEl   = this.formEl
+        # 存放表单定义
+        _form_field = []
+
+        # 取表单定义
+        getFormField = (callback)->
+            $http.get('/api/get.form', params: form: 'app.forms.cms.Category').
+            success (data)->
+                _form_field = data.form
+                $scope.form = angular.copy _form_field
+                if angular.isFunction callback
+                    callback()
+
+        getFormField()
+
+        # 表单保存
+        $scope.submitAct = ->
             postData = {}
-
-            formEl.find('[name]').each ->
-                self = $ this
-                postData[self.attr('name')] = self.val()
-
-            Catgory.save(postData, ->
-                $scope.isList   = true
-                $scope.catgorys = Catgory.mulit()
+            angular.forEach($scope.form, (field)->
+                postData[field.name] = field.data
             )
 
+            Catgory.save(postData, (ret)->
+                $scope.catgorys = Catgory.mulit()
+                getFormField ->
+                    $scope.isList = true
+
+            )
+            
         # 编辑表单
         $scope.edit = (val) ->
-            formEl   = this.formEl
             $scope.isList = false
+            $scope.form   = angular.copy _form_field
 
-            formEl.find('[name]').each ->
-                self = $ this
-                if val[self.attr('name')]
-                    self.val val[self.attr('name')]
+            angular.forEach($scope.form, (field)->
+                # 不能更改模型
+                if field.name == 'table'
+                    field.disabled = true
 
+                # 限制不能选择自身，及下级
+                else if field.name == 'parent' 
+                    fieldLevel = -1
+                    ix = -1
+                    removeCount = 1
+                    isRemove = false 
+                    angular.forEach(field.choices, (v, k)->
+                        level = $.trim(v.label).split('-').length - 1
+                        if v.value.toString() == val.id.toString()
+                            fieldLevel = level
+                            isRemove = true
+                            ix = k 
+
+                        else if level <= fieldLevel and fieldLevel != -1
+                            isRemove = false 
+
+                        else if isRemove and fieldLevel != -1 and level > fieldLevel
+                            removeCount = removeCount + 1
+
+                    )
+
+                    if ix != -1
+                        field.choices.splice(ix, removeCount)
+                     
+                if val[field.name]
+                    field.data = val[field.name]
+            )
+
+
+        # 添加表单
         $scope.add = ->
-            this.formEl[0].reset()
-            
-            this.formEl.find('[type=hidden]').each ->
-                $(this).val('')
             $scope.isList = false
+            $scope.form   = angular.copy _form_field
 
-        $scope.onLoadAppFormsCmsCategory = (el)->
-            formEl = el.find('form')
-            $scope.formEl = formEl
-
+       
        
     ])
     return

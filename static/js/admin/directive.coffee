@@ -14,54 +14,61 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
 
     ])
 
-    app.directive('loadForm', ['$http', '$compile', '$timeout', ($http, $compile, $timeout)->
+    app.directive('wtforms', ['$compile', '$timeout', ($compile, $timeout) ->
         (scope, element, attr) ->
-            formName = attr.loadForm
-            el       = $(element)
+            modelName = attr.wtforms ? 'form'
+            el        = $(element)
+            submitAct = attr.submitAct ? ''
+            tpl       = "
+                <form method=\"post\" name=\"#{modelName}\" ng-submit=\"#{submitAct}\" class=\"form-horizontal\" role=\"form\">
+                    <div ng-repeat=\"field in #{modelName}\">
+                            <div ng-if=\"field.type == 'HiddenField'\">
+                                <input type=\"hidden\" name=\"{{field.name}}\" ng-model=\"field.data\">
+                            </div>
+                            <div class=\"form-group\" ng-if=\"field.type == 'TextField'\">
+                                <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
+                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
+                                    <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required>
+                                    <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\">
+                                </div>
+                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">
+                                    <input id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
+                                </div>
+                            </div>
+                            <div class=\"form-group\" ng-if=\"field.type == 'SelectField'\">
+                                <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
+                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
+                                    <select id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" required>
+                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">
+                                            {{v.label}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">
+                                    <select id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
+                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">
+                                            {{v.label}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                    </div>
+                    <div class=\"form-group\">
+                        <div class=\"col-sm-offset-2 col-sm-10\">
+                            <button type=\"submit\" class=\"btn btn-primary\">
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            "
+            formEl = $ tpl
 
-            el.removeAttr('load-form')
-
-            $http.get("/admin/form?form=#{formName}").success (formHtml)->
-                #actionName = formName.replace(/\./g, '_')
-                actions     = formName.split('.')
-                actionNames = []
-                formName    = false
-                $.each(actions, (k, v) ->
-                    actionNames.push v.toLowerCase().replace(/(?=\b)\w/g, (e) ->
-                        e.toUpperCase()
-                    )
-                )
-                actionName = actionNames.join('')
-
-                el.html(formHtml)
-                # 表单提交时的处理函数
-                submitAction = "onSubmit#{actionName}"
-
-                if $.isFunction scope[submitAction]
-                    el.find('form').attr('ng-submit', "#{submitAction}()")
-
-                if scope["_#{actionName}Name"]
-                    formName = scope["_#{actionName}Name"]
-
-                    el.find('form').attr('name', formName)
-
-                    el.find('.form-group').each ->
-                        groupEl = $(this)
-                        nameEl = groupEl.find('[required]')
-                        #console.log nameEl
-                        if nameEl.length > 0
-                            inputName = nameEl.eq(0).attr('name')
-                            errEl = $ "<div class=\"alert alert-danger\" ng-show=\"#{formName}.#{inputName}.$error.required\">Required!</div>"
-                            nameEl.after errEl
-
-                $compile(el)(scope)
-
-                callbackName = 'onLoad' + actionName
-
-                if $.isFunction scope[callbackName]
-                    $timeout(->
-                        scope[callbackName](el)
-                    , 0)
+            formEl.appendTo el
+            $compile(formEl[0])(scope)
+       
     ])
+
 
     return app

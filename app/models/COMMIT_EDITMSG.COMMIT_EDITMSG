@@ -1,0 +1,831 @@
+'重构表单'
+
+# --------------
+# Please enter the commit message for your changes. Everything below
+# this paragraph is ignored, and an empty message aborts the commit.
+# Just close the window to accept your message.
+diff --git a/app/forms/cms.py b/app/forms/cms.py
+index 564b6db..3211adc 100644
+--- a/app/forms/cms.py
++++ b/app/forms/cms.py
+@@ -41,7 +41,7 @@ class Category(Form):
+         tree = yield gen.Task(cms.Category.td_tree)
+         data = [('0', 'root')]
+         for v in tree:
+-            data.append((str(v['id']), '-%s %s' % (v['icon'], v['title'])))
++            data.append((str(v['id']), '%s %s' % (v['icon'], v['title'])))
+         self.parent.choices = data
+ 
+         tables = yield gen.Task(cms.Table.select().execute)
+diff --git a/app/handlers/admin/__init__.py b/app/handlers/admin/__init__.py
+index b223106..da5cde3 100644
+--- a/app/handlers/admin/__init__.py
++++ b/app/handlers/admin/__init__.py
+@@ -15,7 +15,6 @@ from xcat.utils import sha1
+ from tornado import gen
+ from tornado.web import asynchronous
+ from app.models import User
+-from tornado.util import import_object
+ 
+ 
+ @route(r"/admin", allow=['admin'])
+@@ -27,35 +26,6 @@ class Index(RequestHandler):
+         #print self.current_user
+         self.render('admin/index.html')
+ 
+-@route(r"/admin/form", allow=['admin'])
+-class Form(RequestHandler):
+-
+-    '''取表单的html结构'''
+-    @asynchronous
+-    @gen.engine
+-    def get(self):
+-        form_name = self.get_argument('form')
+-        if not form_name:
+-            self.finish()
+-            return
+-
+-        locale_code = 'en_US'
+-        if hasattr(self, 'locale') and hasattr(self.locale, 'code'):
+-            locale_code = self.locale.code
+-
+-        try:
+-            form_obj = import_object(form_name)(locale_code=locale_code)
+-        except Exception:
+-            self.finish()
+-            return
+-        
+-        form_obj.xsrf_form_html = self.xsrf_form_html
+-        yield gen.Task(form_obj.load_field_data)
+-        form_obj.load_data(self.request.arguments)
+-
+-        self.render('admin/form.html', form=form_obj)
+-        
+-
+ 
+ @route(r"/admin/login")
+ class Login(RequestHandler):
+diff --git a/app/handlers/api/__init__.py b/app/handlers/api/__init__.py
+index 784f72c..01038ed 100644
+--- a/app/handlers/api/__init__.py
++++ b/app/handlers/api/__init__.py
+@@ -9,6 +9,7 @@ from xcat.web import RequestHandler, route, form
+ from tornado import gen
+ from tornado.web import asynchronous 
+ from app.models import cms
++from tornado.util import import_object
+ 
+ class RequestHandler(RequestHandler):
+     # 格式化成json, 并输出
+@@ -16,7 +17,7 @@ class RequestHandler(RequestHandler):
+         data = dict(
+             success=args.get('success', True),
+             msg=args.get('msg', None),
+-            data=args.get('data', None),
++            data=args.get('data', args),
+         )
+         self.write(data)
+         if not self._finished:
+@@ -31,6 +32,33 @@ class RequestHandler(RequestHandler):
+ 
+         return msg
+ 
++@route(r"/api/get\.form", allow=['admin'])
++class GetForm(RequestHandler):
++
++    '''取表单的html结构'''
++    @asynchronous
++    @gen.engine
++    def get(self):
++        form_name = self.get_argument('form')
++        if not form_name:
++            self.jsonify(success=False, msg='Not Form Name')
++            return
++
++        locale_code = 'en_US'
++        if hasattr(self, 'locale') and hasattr(self.locale, 'code'):
++            locale_code = self.locale.code
++
++        try:
++            form_obj = import_object(form_name)(locale_code=locale_code)
++        except Exception, e:
++            self.jsonify(success=False, msg=str(e))
++            return
++        
++        form_obj.xsrf_form_html = self.xsrf_form_html
++        yield gen.Task(form_obj.load_field_data)
++        form_obj.load_data(self.request.arguments)
++
++        self.jsonify(form=form_obj.to_dict())
+ 
+ @route("/api/category", allow=['admin'])
+ class Category(RequestHandler):
+@@ -39,6 +67,7 @@ class Category(RequestHandler):
+     @gen.engine
+     def get(self):
+         tree = yield gen.Task(cms.Category.td_tree)
++
+         self.jsonify(data=tree)
+ 
+     @form('app.forms.cms.Category')
+@@ -65,16 +94,22 @@ class Category(RequestHandler):
+                     msg='not Data')
+                 return
+             category_model = yield gen.Task(category_ar.get)
++
++            
+         else:
+             category_model = False
+ 
+         if post['parent'] != '0':
+             #检查上级是否存在
+             category_ar = cms.Category.select()\
+-                .where(cms.Category.id == post['parent'])\
++                .where(cms.Category.id == post['parent'])
+ 
+             if post['id'] != '':
+-                category_ar = category_ar.where(cms.Category.id != post['id'])
++                # 上级不能是自身及下级
++                ids = [post['id']]
++                for x in (yield gen.Task(cms.Category.get_childs, post['id'])):
++                    ids.append(x['id'])
++                category_ar = category_ar.where(~(cms.Category.id << ids))
+             
+             if 0 == (yield gen.Task(category_ar.count)):
+                 self.jsonify(
+@@ -107,10 +142,15 @@ class Category(RequestHandler):
+ 
+             yield gen.Task(category_model.save)
+         else:
++            
++            #不能更改数据表
++            if 'table' in self.form.data:
++                del self.form.data['table']
++            # category_model.table = yield gen.Task(
++            #     cms.Table.select().where(cms.Table.id == post['table']).get
++            # )
++            
+             self.form.data_to_model(category_model)
+-            category_model.table = yield gen.Task(
+-                cms.Table.select().where(cms.Table.id == post['table']).get
+-            )
+ 
+             yield gen.Task(category_model.save)
+                     
+diff --git a/app/models/cms.py b/app/models/cms.py
+index 103a51b..1f553b5 100644
+--- a/app/models/cms.py
++++ b/app/models/cms.py
+@@ -122,6 +122,9 @@ class Category(AsyncModel):
+ 
+     order = mopee.IntegerField(default=0, index=True)
+ 
++    # 是否启用
++    state = mopee.IntegerField(default=1, index=True)
++
+     @classmethod
+     @gen.engine
+     def td_tree(cls, callback):
+@@ -146,6 +149,25 @@ class Category(AsyncModel):
+             get_childs(v)
+ 
+         callback(td_tree_list)
++
++    @classmethod
++    @gen.engine
++    def get_childs(cls, id, callback):
++        '''取指定分类的下级'''
++        td_tree = yield gen.Task(cls.td_tree)
++        childs = []
++        level = -1
++        is_add = False
++        for v in td_tree:
++            if str(v['id']) == str(id):
++                level = v['level']
++                is_add = True 
++            elif level != -1 and is_add and v['level'] <= level:
++                is_add = False
++            elif level != -1 and is_add and v['level'] > level:
++                childs.append(v)
++
++        callback and callback(childs)
+    
+     @classmethod
+     @gen.engine
+@@ -155,6 +177,8 @@ class Category(AsyncModel):
+             cls.id, cls.parent,
+             cls.title, cls.desc,
+             cls.table, Table.table
++        ).where(
++            cls.state == 1
+         ).join(Table).order_by(
+             cls.order.desc()
+         )
+diff --git a/static/js/admin/ctrls/category.coffee b/static/js/admin/ctrls/category.coffee
+index 591413c..5e08174 100644
+--- a/static/js/admin/ctrls/category.coffee
++++ b/static/js/admin/ctrls/category.coffee
+@@ -1,7 +1,6 @@
+ define ['admin/directive'], (app)->
+     app.controller('categoryCtrl' , ['$scope', '$resource', '$http', 'Msg',
+     ($scope, $resource, $http, Msg)->
+-        Msg.alert 'hello word'
+         actions =
+             save: method: 'POST'
+             mulit: method: 'GET', isArray: true
+@@ -10,43 +9,80 @@ define ['admin/directive'], (app)->
+ 
+         $scope.isList   = true
+         $scope.catgorys = Catgory.mulit()
+-        $scope._AppFormsCmsCategoryName = 'categoryFrom'
+ 
+-          
+-        $scope.onSubmitAppFormsCmsCategory = ->
+-            formEl   = this.formEl
+-            postData = {}
++        # 存放表单定义
++        _form_field = []
+ 
+-            formEl.find('[name]').each ->
+-                self = $ this
+-                postData[self.attr('name')] = self.val()
++        # 取表单定义
++        getFormField = (callback)->
++            $http.get('/api/get.form', params: form: 'app.forms.cms.Category').
++            success (data)->
++                _form_field = data.form
++                $scope.form = angular.copy _form_field
++                if angular.isFunction callback
++                    callback()
+ 
+-            Catgory.save(postData, ->
+-                $scope.isList   = true
+-                $scope.catgorys = Catgory.mulit()
++        getFormField()
++
++        # 表单保存
++        $scope.submitAct = ->
++            postData = {}
++            angular.forEach($scope.form, (field)->
++                postData[field.name] = field.data
+             )
+ 
++            Catgory.save(postData, (ret)->
++                $scope.catgorys = Catgory.mulit()
++                getFormField ->
++                    $scope.isList = true
++
++            )
++            
+         # 编辑表单
+         $scope.edit = (val) ->
+-            formEl   = this.formEl
+             $scope.isList = false
++            $scope.form   = angular.copy _form_field
++
++            angular.forEach($scope.form, (field)->
++                # 不能更改模型
++                if field.name == 'table'
++                    field.disabled = true
+ 
+-            formEl.find('[name]').each ->
+-                self = $ this
+-                if val[self.attr('name')]
+-                    self.val val[self.attr('name')]
++                # 限制不能选择自身，及下级
++                else if field.name == 'parent' 
++                    fieldLevel = -1
++                    ix = -1
++                    removeCount = 1
++                    isRemove = false 
++                    angular.forEach(field.choices, (v, k)->
++                        level = $.trim(v.label).split('-').length - 1
++                        if v.value.toString() == val.id.toString()
++                            fieldLevel = level
++                            isRemove = true
++                            ix = k 
+ 
++                        else if level <= fieldLevel and fieldLevel != -1
++                            isRemove = false 
++
++                        else if isRemove and fieldLevel != -1 and level > fieldLevel
++                            removeCount = removeCount + 1
++
++                    )
++
++                    if ix != -1
++                        field.choices.splice(ix, removeCount)
++                     
++                if val[field.name]
++                    field.data = val[field.name]
++            )
++
++
++        # 添加表单
+         $scope.add = ->
+-            this.formEl[0].reset()
+-            
+-            this.formEl.find('[type=hidden]').each ->
+-                $(this).val('')
+             $scope.isList = false
++            $scope.form   = angular.copy _form_field
+ 
+-        $scope.onLoadAppFormsCmsCategory = (el)->
+-            formEl = el.find('form')
+-            $scope.formEl = formEl
+-
++       
+        
+     ])
+     return
+diff --git a/static/js/admin/ctrls/category.js b/static/js/admin/ctrls/category.js
+index 58ab1fb..bb86460 100644
+--- a/static/js/admin/ctrls/category.js
++++ b/static/js/admin/ctrls/category.js
+@@ -3,8 +3,7 @@
+   define(['admin/directive'], function(app) {
+     app.controller('categoryCtrl', [
+       '$scope', '$resource', '$http', 'Msg', function($scope, $resource, $http, Msg) {
+-        var Catgory, actions;
+-        Msg.alert('hello word');
++        var Catgory, actions, getFormField, _form_field;
+         actions = {
+           save: {
+             method: 'POST'
+@@ -17,44 +16,71 @@
+         Catgory = $resource('/api/category', {}, actions);
+         $scope.isList = true;
+         $scope.catgorys = Catgory.mulit();
+-        $scope._AppFormsCmsCategoryName = 'categoryFrom';
+-        $scope.onSubmitAppFormsCmsCategory = function() {
+-          var formEl, postData;
+-          formEl = this.formEl;
++        _form_field = [];
++        getFormField = function(callback) {
++          return $http.get('/api/get.form', {
++            params: {
++              form: 'app.forms.cms.Category'
++            }
++          }).success(function(data) {
++            _form_field = data.form;
++            $scope.form = angular.copy(_form_field);
++            if (angular.isFunction(callback)) {
++              return callback();
++            }
++          });
++        };
++        getFormField();
++        $scope.submitAct = function() {
++          var postData;
+           postData = {};
+-          formEl.find('[name]').each(function() {
+-            var self;
+-            self = $(this);
+-            return postData[self.attr('name')] = self.val();
++          angular.forEach($scope.form, function(field) {
++            return postData[field.name] = field.data;
+           });
+-          return Catgory.save(postData, function() {
+-            $scope.isList = true;
+-            return $scope.catgorys = Catgory.mulit();
++          return Catgory.save(postData, function(ret) {
++            $scope.catgorys = Catgory.mulit();
++            return getFormField(function() {
++              return $scope.isList = true;
++            });
+           });
+         };
+         $scope.edit = function(val) {
+-          var formEl;
+-          formEl = this.formEl;
+           $scope.isList = false;
+-          return formEl.find('[name]').each(function() {
+-            var self;
+-            self = $(this);
+-            if (val[self.attr('name')]) {
+-              return self.val(val[self.attr('name')]);
++          $scope.form = angular.copy(_form_field);
++          return angular.forEach($scope.form, function(field) {
++            var fieldLevel, isRemove, ix, removeCount;
++            if (field.name === 'table') {
++              field.disabled = true;
++            } else if (field.name === 'parent') {
++              fieldLevel = -1;
++              ix = -1;
++              removeCount = 1;
++              isRemove = false;
++              angular.forEach(field.choices, function(v, k) {
++                var level;
++                level = $.trim(v.label).split('-').length - 1;
++                if (v.value.toString() === val.id.toString()) {
++                  fieldLevel = level;
++                  isRemove = true;
++                  return ix = k;
++                } else if (level <= fieldLevel && fieldLevel !== -1) {
++                  return isRemove = false;
++                } else if (isRemove && fieldLevel !== -1 && level > fieldLevel) {
++                  return removeCount = removeCount + 1;
++                }
++              });
++              if (ix !== -1) {
++                field.choices.splice(ix, removeCount);
++              }
++            }
++            if (val[field.name]) {
++              return field.data = val[field.name];
+             }
+           });
+         };
+-        $scope.add = function() {
+-          this.formEl[0].reset();
+-          this.formEl.find('[type=hidden]').each(function() {
+-            return $(this).val('');
+-          });
+-          return $scope.isList = false;
+-        };
+-        return $scope.onLoadAppFormsCmsCategory = function(el) {
+-          var formEl;
+-          formEl = el.find('form');
+-          return $scope.formEl = formEl;
++        return $scope.add = function() {
++          $scope.isList = false;
++          return $scope.form = angular.copy(_form_field);
+         };
+       }
+     ]);
+diff --git a/static/js/admin/directive.coffee b/static/js/admin/directive.coffee
+index 5a1e9b5..1234acb 100644
+--- a/static/js/admin/directive.coffee
++++ b/static/js/admin/directive.coffee
+@@ -14,54 +14,61 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
+ 
+     ])
+ 
+-    app.directive('loadForm', ['$http', '$compile', '$timeout', ($http, $compile, $timeout)->
++    app.directive('wtforms', ['$compile', '$timeout', ($compile, $timeout) ->
+         (scope, element, attr) ->
+-            formName = attr.loadForm
+-            el       = $(element)
+-
+-            el.removeAttr('load-form')
+-
+-            $http.get("/admin/form?form=#{formName}").success (formHtml)->
+-                #actionName = formName.replace(/\./g, '_')
+-                actions     = formName.split('.')
+-                actionNames = []
+-                formName    = false
+-                $.each(actions, (k, v) ->
+-                    actionNames.push v.toLowerCase().replace(/(?=\b)\w/g, (e) ->
+-                        e.toUpperCase()
+-                    )
+-                )
+-                actionName = actionNames.join('')
+-
+-                el.html(formHtml)
+-                # 表单提交时的处理函数
+-                submitAction = "onSubmit#{actionName}"
+-
+-                if $.isFunction scope[submitAction]
+-                    el.find('form').attr('ng-submit', "#{submitAction}()")
+-
+-                if scope["_#{actionName}Name"]
+-                    formName = scope["_#{actionName}Name"]
+-
+-                    el.find('form').attr('name', formName)
+-
+-                    el.find('.form-group').each ->
+-                        groupEl = $(this)
+-                        nameEl = groupEl.find('[required]')
+-                        #console.log nameEl
+-                        if nameEl.length > 0
+-                            inputName = nameEl.eq(0).attr('name')
+-                            errEl = $ "<div class=\"alert alert-danger\" ng-show=\"#{formName}.#{inputName}.$error.required\">Required!</div>"
+-                            nameEl.after errEl
+-
+-                $compile(el)(scope)
+-
+-                callbackName = 'onLoad' + actionName
++            modelName = attr.wtforms ? 'form'
++            el        = $(element)
++            submitAct = attr.submitAct ? ''
++            tpl       = "
++                <form method=\"post\" name=\"#{modelName}\" ng-submit=\"#{submitAct}\" class=\"form-horizontal\" role=\"form\">
++                    <div ng-repeat=\"field in #{modelName}\">
++                            <div ng-if=\"field.type == 'HiddenField'\">
++                                <input type=\"hidden\" name=\"{{field.name}}\" ng-model=\"field.data\">
++                            </div>
++                            <div class=\"form-group\" ng-if=\"field.type == 'TextField'\">
++                                <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
++                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
++                                    <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required>
++                                    <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\">
++                                </div>
++                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">
++                                    <input id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
++                                </div>
++                            </div>
++                            <div class=\"form-group\" ng-if=\"field.type == 'SelectField'\">
++                                <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
++                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
++                                    <select id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" required>
++                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">
++                                            {{v.label}}
++                                        </option>
++                                    </select>
++                                </div>
++                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">
++                                    <select id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
++                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">
++                                            {{v.label}}
++                                        </option>
++                                    </select>
++                                </div>
++                            </div>
++                            
++                    </div>
++                    <div class=\"form-group\">
++                        <div class=\"col-sm-offset-2 col-sm-10\">
++                            <button type=\"submit\" class=\"btn btn-primary\">
++                                保存
++                            </button>
++                        </div>
++                    </div>
++                </form>
++            "
++            formEl = $ tpl
+ 
+-                if $.isFunction scope[callbackName]
+-                    $timeout(->
+-                        scope[callbackName](el)
+-                    , 0)
++            formEl.appendTo el
++            $compile(formEl[0])(scope)
++       
+     ])
+ 
++
+     return app
+diff --git a/static/js/admin/directive.js b/static/js/admin/directive.js
+index 4eb1838..a60f953 100644
+--- a/static/js/admin/directive.js
++++ b/static/js/admin/directive.js
+@@ -17,51 +17,17 @@
+         };
+       }
+     ]);
+-    app.directive('loadForm', [
+-      '$http', '$compile', '$timeout', function($http, $compile, $timeout) {
++    app.directive('wtforms', [
++      '$compile', '$timeout', function($compile, $timeout) {
+         return function(scope, element, attr) {
+-          var el, formName;
+-          formName = attr.loadForm;
++          var el, formEl, modelName, submitAct, tpl, _ref, _ref1;
++          modelName = (_ref = attr.wtforms) != null ? _ref : 'form';
+           el = $(element);
+-          el.removeAttr('load-form');
+-          return $http.get("/admin/form?form=" + formName).success(function(formHtml) {
+-            var actionName, actionNames, actions, callbackName, submitAction;
+-            actions = formName.split('.');
+-            actionNames = [];
+-            formName = false;
+-            $.each(actions, function(k, v) {
+-              return actionNames.push(v.toLowerCase().replace(/(?=\b)\w/g, function(e) {
+-                return e.toUpperCase();
+-              }));
+-            });
+-            actionName = actionNames.join('');
+-            el.html(formHtml);
+-            submitAction = "onSubmit" + actionName;
+-            if ($.isFunction(scope[submitAction])) {
+-              el.find('form').attr('ng-submit', "" + submitAction + "()");
+-            }
+-            if (scope["_" + actionName + "Name"]) {
+-              formName = scope["_" + actionName + "Name"];
+-              el.find('form').attr('name', formName);
+-              el.find('.form-group').each(function() {
+-                var errEl, groupEl, inputName, nameEl;
+-                groupEl = $(this);
+-                nameEl = groupEl.find('[required]');
+-                if (nameEl.length > 0) {
+-                  inputName = nameEl.eq(0).attr('name');
+-                  errEl = $("<div class=\"alert alert-danger\" ng-show=\"" + formName + "." + inputName + ".$error.required\">Required!</div>");
+-                  return nameEl.after(errEl);
+-                }
+-              });
+-            }
+-            $compile(el)(scope);
+-            callbackName = 'onLoad' + actionName;
+-            if ($.isFunction(scope[callbackName])) {
+-              return $timeout(function() {
+-                return scope[callbackName](el);
+-              }, 0);
+-            }
+-          });
++          submitAct = (_ref1 = attr.submitAct) != null ? _ref1 : '';
++          tpl = "                <form method=\"post\" name=\"" + modelName + "\" ng-submit=\"" + submitAct + "\" class=\"form-horizontal\" role=\"form\">                    <div ng-repeat=\"field in " + modelName + "\">                            <div ng-if=\"field.type == 'HiddenField'\">                                <input type=\"hidden\" name=\"{{field.name}}\" ng-model=\"field.data\">                            </div>                            <div class=\"form-group\" ng-if=\"field.type == 'TextField'\">                                <label for=\"wt-" + modelName + "-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required>                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\">                                </div>                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">                                    <input id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>                                </div>                            </div>                            <div class=\"form-group\" ng-if=\"field.type == 'SelectField'\">                                <label for=\"wt-" + modelName + "-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>                                <div class=\"col-sm-10\" ng-if=\"!field.disabled\">                                    <select id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" required>                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">                                            {{v.label}}                                        </option>                                    </select>                                </div>                                <div class=\"col-sm-10\" ng-if=\"field.disabled\">                                    <select id=\"wt-" + modelName + "-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>                                        <option ng-selected=\"field.data == v.value\" ng-repeat=\"v in field.choices\" value=\"{{v.value}}\">                                            {{v.label}}                                        </option>                                    </select>                                </div>                            </div>                                                </div>                    <div class=\"form-group\">                        <div class=\"col-sm-offset-2 col-sm-10\">                            <button type=\"submit\" class=\"btn btn-primary\">                                保存                            </button>                        </div>                    </div>                </form>            ";
++          formEl = $(tpl);
++          formEl.appendTo(el);
++          return $compile(formEl[0])(scope);
+         };
+       }
+     ]);
+diff --git a/static/js/admin/provider.coffee b/static/js/admin/provider.coffee
+index d16a2b1..36b1c8b 100644
+--- a/static/js/admin/provider.coffee
++++ b/static/js/admin/provider.coffee
+@@ -1,35 +1,34 @@
+ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
+-    _msgEl = $ "<div></div>" 
+ 
+-    _msgEl.css 
+-        position: 'absolute'
+-        width: 200
+-        top: 2
+-        left: '50%'
+-        marginLeft: -200
++    _msgWrapEl = $ '
++        <div class="row"><div class="col-md-4 col-md-offset-4 msg-el"></div></div>
++    '
++    _msgEl = _msgWrapEl.find('.msg-el')
++
++    _msgWrapEl.css 
+         zIndex: 1500
+ 
++    _msgEl.css 
++        position: 'relative'
++
+     app.provider 'Msg', ->
+         Msg = {}
+         Msg.pushMsg = (msg, type='warning') ->
+             el = $ "
+             <div class=\"alert alert-#{type}\">
+-                <button type=\"button\" class=\"close\">&times;</button>
++                <button type=\"button\" data-dismiss=\"alert\" aria-hidden=\"true\" class=\"close\">&times;</button>
+                 #{msg}
+             </div>"
+ 
++            el.css 
++                position: 'absolute'
++                width: '100%'
++                zIndex: 1500
++
+             time = setTimeout ->
+                 el.remove()
+             , 3000
+ 
+-            el.on('click', 'button.close', ->
+-                if time
+-                    clearTimeout time
+-
+-                el.remove()
+-                false
+-            )
+-
+             el.appendTo _msgEl
+ 
+             return
+@@ -45,6 +44,6 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
+ 
+         this.$get = -> Msg
+ 
+-    $ -> _msgEl.appendTo 'body'
++    $ -> _msgWrapEl.prependTo 'body'
+ 
+     app
+\ No newline at end of file
+diff --git a/static/js/admin/provider.js b/static/js/admin/provider.js
+index d684c69..999ae3a 100644
+--- a/static/js/admin/provider.js
++++ b/static/js/admin/provider.js
+@@ -1,16 +1,17 @@
+ // Generated by CoffeeScript 1.6.3
+ (function() {
+   define(['jQuery', 'admin/app', 'bootstrap'], function($, app) {
+-    var _msgEl;
+-    _msgEl = $("<div></div>");
+-    _msgEl.css({
+-      position: 'absolute',
+-      width: 200,
+-      top: 2,
+-      left: '50%',
+-      marginLeft: -200,
++    var _msgEl, _msgWrapEl;
++    _msgWrapEl = $('\
++        <div class="row"><div class="col-md-4 col-md-offset-4 msg-el"></div></div>\
++    ');
++    _msgEl = _msgWrapEl.find('.msg-el');
++    _msgWrapEl.css({
+       zIndex: 1500
+     });
++    _msgEl.css({
++      position: 'relative'
++    });
+     app.provider('Msg', function() {
+       var Msg;
+       Msg = {};
+@@ -19,17 +20,15 @@
+         if (type == null) {
+           type = 'warning';
+         }
+-        el = $("            <div class=\"alert alert-" + type + "\">                <button type=\"button\" class=\"close\">&times;</button>                " + msg + "            </div>");
++        el = $("            <div class=\"alert alert-" + type + "\">                <button type=\"button\" data-dismiss=\"alert\" aria-hidden=\"true\" class=\"close\">&times;</button>                " + msg + "            </div>");
++        el.css({
++          position: 'absolute',
++          width: '100%',
++          zIndex: 1500
++        });
+         time = setTimeout(function() {
+           return el.remove();
+         }, 3000);
+-        el.on('click', 'button.close', function() {
+-          if (time) {
+-            clearTimeout(time);
+-          }
+-          el.remove();
+-          return false;
+-        });
+         el.appendTo(_msgEl);
+       };
+       Msg.alert = function(msg) {
+@@ -46,7 +45,7 @@
+       };
+     });
+     $(function() {
+-      return _msgEl.appendTo('body');
++      return _msgWrapEl.prependTo('body');
+     });
+     return app;
+   });
+diff --git a/static/js/admin/tpls/category.html b/static/js/admin/tpls/category.html
+index 2ecfc29..01a8bfc 100644
+--- a/static/js/admin/tpls/category.html
++++ b/static/js/admin/tpls/category.html
+@@ -27,7 +27,7 @@
+             <tbody>
+                 <tr ng-repeat="v in catgorys">
+                     <td>{{v.id}}</td>
+-                    <td><i class="icon-ellipsis-vertical"></i>{{v.icon}} {{v.title}}</td>
++                    <td> | {{v.icon}} &nbsp; {{v.title}}</td>
+                     <td>{{v.desc}}</td>
+                     <td>{{v.table_name}}</td>
+                     <td>
+@@ -42,7 +42,7 @@
+     </div>
+ </div>
+ 
+-<div class="panel panel-default" ng-show="isList == false">
++<div class="panel panel-default" ng-show="!isList">
+     <div class="panel-heading">
+         <h3 class="panel-title">
+             <button ng-click="isList = true" class="btn btn-default btn-sm">
+@@ -52,6 +52,5 @@
+ 
+         </h3>
+     </div>
+-    <div class="panel-body" load-form="app.forms.cms.Category">
+-    </div>
++    <div class="panel-body" submit-act="submitAct()" wtforms="form"></div>
+ </div>
+diff --git a/xcat/form.py b/xcat/form.py
+index 18ec45b..1bc015e 100644
+--- a/xcat/form.py
++++ b/xcat/form.py
+@@ -53,12 +53,36 @@ class Form(wtForm):
+         formdata = TornadoArgumentsWrapper(MopeeObjWrapper(obj, self))
+         return self.process(formdata)
+ 
++    def to_dict(self):
++        fields = []
++        for field in self:
++            choices = []
++            for v in (hasattr(field, 'choices') and field.choices or []):
++                choices.append(dict(
++                    label = v[1],
++                    value = v[0],
++                )) 
++
++            item = dict(
++                name = field.name,
++                label = field.label.text,
++                type = field.type, 
++                data = field.data,
++                choices = choices,
++                required = field.flags.required,
++                disabled = False,
++            )
++
++            if len(choices) > 0 and str(field.data).strip() == 'None':
++                item['data'] = choices[0]['value']
++
++            fields.append(item)
++        return fields
++
+     def data_to_model(self, model):
+-        #print self.data
+         for v in self.data:
+             if hasattr(model, v):
+                 setattr(model, v, self.data[v])
+-                #print v, getattr(model, v)
+ 
+         return model

@@ -122,6 +122,9 @@ class Category(AsyncModel):
 
     order = mopee.IntegerField(default=0, index=True)
 
+    # 是否启用
+    state = mopee.IntegerField(default=1, index=True)
+
     @classmethod
     @gen.engine
     def td_tree(cls, callback):
@@ -146,6 +149,25 @@ class Category(AsyncModel):
             get_childs(v)
 
         callback(td_tree_list)
+
+    @classmethod
+    @gen.engine
+    def get_childs(cls, id, callback):
+        '''取指定分类的下级'''
+        td_tree = yield gen.Task(cls.td_tree)
+        childs = []
+        level = -1
+        is_add = False
+        for v in td_tree:
+            if str(v['id']) == str(id):
+                level = v['level']
+                is_add = True 
+            elif level != -1 and is_add and v['level'] <= level:
+                is_add = False
+            elif level != -1 and is_add and v['level'] > level:
+                childs.append(v)
+
+        callback and callback(childs)
    
     @classmethod
     @gen.engine
@@ -155,6 +177,8 @@ class Category(AsyncModel):
             cls.id, cls.parent,
             cls.title, cls.desc,
             cls.table, Table.table
+        ).where(
+            cls.state == 1
         ).join(Table).order_by(
             cls.order.desc()
         )

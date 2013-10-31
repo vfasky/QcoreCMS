@@ -53,12 +53,36 @@ class Form(wtForm):
         formdata = TornadoArgumentsWrapper(MopeeObjWrapper(obj, self))
         return self.process(formdata)
 
+    def to_dict(self):
+        fields = []
+        for field in self:
+            choices = []
+            for v in (hasattr(field, 'choices') and field.choices or []):
+                choices.append(dict(
+                    label = v[1],
+                    value = v[0],
+                )) 
+
+            item = dict(
+                name = field.name,
+                label = field.label.text,
+                type = field.type, 
+                data = field.data,
+                choices = choices,
+                required = field.flags.required,
+                disabled = False,
+            )
+
+            if len(choices) > 0 and str(field.data).strip() == 'None':
+                item['data'] = choices[0]['value']
+
+            fields.append(item)
+        return fields
+
     def data_to_model(self, model):
-        #print self.data
         for v in self.data:
             if hasattr(model, v):
                 setattr(model, v, self.data[v])
-                #print v, getattr(model, v)
 
         return model
 

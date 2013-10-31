@@ -15,7 +15,6 @@ from xcat.utils import sha1
 from tornado import gen
 from tornado.web import asynchronous
 from app.models import User
-from tornado.util import import_object
 
 
 @route(r"/admin", allow=['admin'])
@@ -26,35 +25,6 @@ class Index(RequestHandler):
     def get(self):
         #print self.current_user
         self.render('admin/index.html')
-
-@route(r"/admin/form", allow=['admin'])
-class Form(RequestHandler):
-
-    '''取表单的html结构'''
-    @asynchronous
-    @gen.engine
-    def get(self):
-        form_name = self.get_argument('form')
-        if not form_name:
-            self.finish()
-            return
-
-        locale_code = 'en_US'
-        if hasattr(self, 'locale') and hasattr(self.locale, 'code'):
-            locale_code = self.locale.code
-
-        try:
-            form_obj = import_object(form_name)(locale_code=locale_code)
-        except Exception:
-            self.finish()
-            return
-        
-        form_obj.xsrf_form_html = self.xsrf_form_html
-        yield gen.Task(form_obj.load_field_data)
-        form_obj.load_data(self.request.arguments)
-
-        self.render('admin/form.html', form=form_obj)
-        
 
 
 @route(r"/admin/login")
