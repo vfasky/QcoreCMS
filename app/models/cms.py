@@ -127,9 +127,9 @@ class Category(AsyncModel):
 
     @classmethod
     @gen.engine
-    def td_tree(cls, callback):
+    def td_tree(cls, callback, all_state=False):
         '''返回二维树'''
-        tree_list = yield gen.Task(cls.tree)
+        tree_list = yield gen.Task(cls.tree, all_state=all_state)
         td_tree_list = []
 
         def get_childs(item):
@@ -154,34 +154,36 @@ class Category(AsyncModel):
     @gen.engine
     def get_childs(cls, id, callback):
         '''取指定分类的下级'''
-        td_tree = yield gen.Task(cls.td_tree)
+        td_tree = yield gen.Task(cls.td_tree, all_state=True)
         childs = []
         level = -1
         is_add = False
         for v in td_tree:
             if str(v['id']) == str(id):
                 level = v['level']
-                is_add = True 
+                is_add = True
             elif level != -1 and is_add and v['level'] <= level:
                 is_add = False
             elif level != -1 and is_add and v['level'] > level:
                 childs.append(v)
 
         callback and callback(childs)
-   
+
     @classmethod
     @gen.engine
-    def tree(cls, callback):
+    def tree(cls, callback, all_state=False):
         '''返回多维树'''
         ar = cls.select(
             cls.id, cls.parent,
             cls.title, cls.desc,
             cls.table, Table.table
-        ).where(
-            cls.state == 1
         ).join(Table).order_by(
             cls.order.desc()
         )
+
+        # 返回所有状态
+        if False == all_state:
+            ar.where(cls.state == 1)
 
         data = yield gen.Task(ar.execute)
 
@@ -216,6 +218,7 @@ class Category(AsyncModel):
 
         callback(tree_list)
 
+
 def content_clone(table):
     '''复制一个内容索引模型'''
     class Copy(AsyncModel):
@@ -233,7 +236,7 @@ def content_clone(table):
             User, related_name='%s_user_id' % table, help_text='发布者')
         category = mopee.ForeignKeyField(
             Category, related_name='%s_category_id' % table, help_text='所属分类')
-        #0 下线 1 为发布 2 为草稿
+        # 0 下线 1 为发布 2 为草稿
         status = mopee.IntegerField(default=1, index=1, help_text='状态')
         # 1 为容许评论 0 为禁止
         allow_comment = mopee.IntegerField(default=1, help_text='是否容许评论')

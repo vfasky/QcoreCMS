@@ -1,6 +1,6 @@
-define ['admin/directive'], (app)->
-    app.controller('categoryCtrl' , ['$scope', '$resource', '$http', 'Msg',
-    ($scope, $resource, $http, Msg)->
+define ['admin/factory'], (app)->
+    app.controller('categoryCtrl' , ['$scope', '$resource', '$http',
+    ($scope, $resource, $http)->
         actions =
             save: method: 'POST'
             mulit: method: 'GET', isArray: true
@@ -49,20 +49,20 @@ define ['admin/directive'], (app)->
                     field.disabled = true
 
                 # 限制不能选择自身，及下级
-                else if field.name == 'parent' 
+                else if field.name == 'parent'
                     fieldLevel = -1
                     ix = -1
                     removeCount = 1
-                    isRemove = false 
+                    isRemove = false
                     angular.forEach(field.choices, (v, k)->
                         level = $.trim(v.label).split('-').length - 1
                         if v.value.toString() == val.id.toString()
                             fieldLevel = level
                             isRemove = true
-                            ix = k 
+                            ix = k
 
                         else if level <= fieldLevel and fieldLevel != -1
-                            isRemove = false 
+                            isRemove = false
 
                         else if isRemove and fieldLevel != -1 and level > fieldLevel
                             removeCount = removeCount + 1
