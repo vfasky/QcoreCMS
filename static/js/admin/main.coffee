@@ -3,6 +3,19 @@ require ['jQuery', 'angular', 'admin/route'], ($, angular, app)->
     ctrls = []
     routes = []
 
+    # 菜单事件
+    $ ->
+        el = $ '[admin-menu]'
+        el.on 'click', 'a[data-toggle], a[avatar]', ->
+            el.find('li.active').removeClass('active')
+            $(this).parent().addClass('active')
+
+        el.find('li.dropdown').each ->
+            self = $ this
+            if self.find('li').length == 0
+                self.remove()
+        return
+
     $.getJSON '/api/admin.route', (json)->
         if false == json.success
             alert json.msg

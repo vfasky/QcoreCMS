@@ -14,6 +14,7 @@ define ['jQuery', 'admin/app', 'bootstrap'], ($, app)->
 
     ])
 
+    
     app.directive('wtforms', ['$compile', '$timeout', ($compile, $timeout) ->
         (scope, element, attr) ->
             modelName = attr.wtforms ? 'form'

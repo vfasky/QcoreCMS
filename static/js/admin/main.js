@@ -4,6 +4,21 @@
     var ctrls, routes;
     ctrls = [];
     routes = [];
+    $(function() {
+      var el;
+      el = $('[admin-menu]');
+      el.on('click', 'a[data-toggle], a[avatar]', function() {
+        el.find('li.active').removeClass('active');
+        return $(this).parent().addClass('active');
+      });
+      el.find('li.dropdown').each(function() {
+        var self;
+        self = $(this);
+        if (self.find('li').length === 0) {
+          return self.remove();
+        }
+      });
+    });
     $.getJSON('/api/admin.route', function(json) {
       var v, _i, _len, _ref;
       if (false === json.success) {
