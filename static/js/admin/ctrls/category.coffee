@@ -1,5 +1,5 @@
 define ['admin/factory'], (app)->
-    app.controller('categoryCtrl' , ['$scope', '$resource', '$http',
+    app.controller('content_category' , ['$scope', '$resource', '$http',
     ($scope, $resource, $http)->
         actions =
             save: method: 'POST'

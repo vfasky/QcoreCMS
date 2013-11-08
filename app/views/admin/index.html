@@ -1,5 +1,23 @@
 {% extends "admin/_base.html" %}
 
+{%- macro menu(node) -%}
+{% if node['child'] | length >  0 %}
+    <li class="dropdown">
+    <a {%if node['is_ctrl'] %} href="#{{node['uri']}}" {% else %} href="" {% endif %} class="dropdown-toggle" data-toggle="dropdown">
+            {{node['title']}} <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+            {% for v in node['child'] %}
+            {{ menu(v) }}
+            {% endfor %}
+        </ul>
+    </li>
+{% elif node['is_ctrl'] %}
+    <li><a href="#{{node['uri']}}">{{node['title']}}</a></li>
+{% endif %}
+{%- endmacro -%}
+
+
 {% block body %}
 <div class="container">
     <!-- Static navbar -->
@@ -14,21 +32,10 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Link</a></li>
-                <li><a href="#">Link</a></li>
-                <li><a href="#">Link</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">内容 <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#/category">分类</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li class="divider"></li>
-                        <li class="dropdown-header">Nav header</li>
-                        <li><a href="#">Separated link</a></li>
-                        <li><a href="#">One more separated link</a></li>
-                    </ul>
-                </li>
+                {% for v in admin_menu %}
+                {{ menu(v) }}
+                {% endfor %} 
+                <!-- active -->
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li class="active"><a href="#/user">

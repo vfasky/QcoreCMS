@@ -15,7 +15,7 @@ from xcat.utils import sha1
 from tornado import gen
 from tornado.web import asynchronous
 from app.models import User
-
+from ..api.helpers import admin_menu
 
 @route(r"/admin", allow=['admin'])
 class Index(RequestHandler):
@@ -24,7 +24,7 @@ class Index(RequestHandler):
 
     def get(self):
         #print self.current_user
-        self.render('admin/index.html')
+        self.render('admin/index.html', admin_menu=admin_menu.list()['menu'])
 
 
 @route(r"/admin/login")

@@ -11,6 +11,8 @@ from tornado.web import asynchronous
 from app.models import cms
 from tornado.util import import_object
 
+from .helpers import admin_menu
+
 class RequestHandler(RequestHandler):
     # 格式化成json, 并输出
     def jsonify(self, **args):
@@ -32,7 +34,7 @@ class RequestHandler(RequestHandler):
 
         return msg
 
-@route(r"/api/get\.form", allow=['admin'])
+@route("/api/get.form", allow=['admin'])
 class GetForm(RequestHandler):
 
     '''取表单的html结构'''
@@ -60,6 +62,18 @@ class GetForm(RequestHandler):
 
         self.jsonify(form=form_obj.to_dict())
 
+@route("/api/admin.menu", allow=['admin'])
+class AdminMenu(RequestHandler):
+
+    def get(self):
+        admin_menu.add('content', title='内容管理', is_ctrl=False, order=10)
+        admin_menu.add('system', title='系统设置', is_ctrl=False, order=9)
+        admin_menu.add('plugin', title='插件', is_ctrl=False, order=8)
+
+        self.jsonify(data=admin_menu.list())
+
+
+@admin_menu('content/category', title='分类')
 @route("/api/category", allow=['admin'])
 class Category(RequestHandler):
 

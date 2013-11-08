@@ -1,8 +1,7 @@
-define ['admin/provider', 'admin/ctrls/category'], (app, categoryCtrl)->
-    tplPath = '/static/js/admin/tpls'
+define ['admin/provider'], (app)->
 
-    app.config ['$routeProvider', '$httpProvider', 'MsgProvider' 
-      ($routeProvider, $httpProvider, MsgProvider)->
+    app.config ['$httpProvider', 'MsgProvider'
+      ($httpProvider, MsgProvider)->
         $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
         $httpProvider.defaults.transformRequest = (data) ->
@@ -19,15 +18,8 @@ define ['admin/provider', 'admin/ctrls/category'], (app, categoryCtrl)->
                     return null
             else
                 return data
-
-
-        $routeProvider.when('/category',
-            controller: "categoryCtrl",
-            templateUrl: "#{tplPath}/category.html"
-        )
+        
     ]
-
- 
-
+    
     app
     
