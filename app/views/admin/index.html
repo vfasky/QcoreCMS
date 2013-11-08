@@ -12,7 +12,7 @@
             {% endfor %}
         </ul>
     </li>
-{% elif node['is_ctrl'] %}
+{% elif node['is_ctrl'] and node['is_show']%}
     <li><a href="#{{node['uri']}}">{{node['title']}}</a></li>
 {% endif %}
 {%- endmacro -%}
@@ -38,7 +38,7 @@
                 <!-- active -->
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li class="active"><a href="#/user">
+                <li class="active"><a href="#/system/me">
                     <img class="img-circle" width="16" height="16" src="{{handler.current_user['gravatar']}}" alt="">
                     {{handler.current_user['name']}}
                 </a></li>

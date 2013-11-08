@@ -37,11 +37,12 @@ class AdminMenu(object):
 
         attr = dict(
             _order=args.get('order', 0),
-            _js=args.get('ctrl', 'admin/ctrls/%s' % name),
-            _tpl=args.get('tpl', '/static/js/admin/tpls/%s.html' % name),
+            _js=args.get('ctrl', 'admin/ctrls/%s' % path),
+            _tpl=args.get('tpl', '/static/js/admin/tpls/%s.html' % path),
             _title=args.get('title', name),
             _uri=args.get('uri', '/%s' % path),
             _is_ctrl=args.get('is_ctrl', True),
+            _is_show=args.get('is_show', True),
             _path=path.replace('/', '_'),
             _name=name,
         )
@@ -66,7 +67,7 @@ class AdminMenu(object):
         routes = []
         def get_menu(data):
             keys = ('_order', '_js', '_tpl', '_uri', '_path',
-                    '_title', '_name', '_is_ctrl')
+                    '_title', '_name', '_is_ctrl', '_is_show')
             menu = []
             
             for v in data:
@@ -77,6 +78,7 @@ class AdminMenu(object):
                         order=0,
                         uri='',
                         is_ctrl=False,
+                        is_show=False,
                         child=[]
                     )
 
@@ -107,6 +109,11 @@ class AdminMenu(object):
 # 别名
 admin_menu = AdminMenu
 
+# 加入默认菜单
+admin_menu.add('content', title='内容', is_ctrl=False, order=10)
+admin_menu.add('system', title='系统', is_ctrl=False, order=9)
+admin_menu.add('plugin', title='插件', is_ctrl=False, order=8)
+
 
 # 测试
 if __name__ == '__main__':
@@ -125,7 +132,7 @@ if __name__ == '__main__':
 
             self.assert_equal(
                 result['test']['admin']['_js'], 
-                'admin/ctrls/admin')
+                'admin/ctrls/test/admin')
 
             result = AdminMenu.add('test/admin2', title='test', order=100)
 

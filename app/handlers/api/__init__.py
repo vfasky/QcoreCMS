@@ -37,7 +37,7 @@ class RequestHandler(RequestHandler):
 @route("/api/get.form", allow=['admin'])
 class GetForm(RequestHandler):
 
-    '''取表单的html结构'''
+    '''取表单的结构'''
     @asynchronous
     @gen.engine
     def get(self):
@@ -62,18 +62,24 @@ class GetForm(RequestHandler):
 
         self.jsonify(form=form_obj.to_dict())
 
-@route("/api/admin.menu", allow=['admin'])
-class AdminMenu(RequestHandler):
+@route("/api/admin.route", allow=['admin'])
+class AdminRoute(RequestHandler):
+    '''后台路由'''
 
     def get(self):
-        admin_menu.add('content', title='内容管理', is_ctrl=False, order=10)
-        admin_menu.add('system', title='系统设置', is_ctrl=False, order=9)
-        admin_menu.add('plugin', title='插件', is_ctrl=False, order=8)
-
         self.jsonify(data=admin_menu.list())
 
+@admin_menu('system/me', is_show=False)
+@route("/api/me", allow=['admin'])
+class Me(RequestHandler):
+    '''个人资料'''
 
-@admin_menu('content/category', title='分类')
+    def get(self):
+        print self.current_user
+        pass
+        
+
+@admin_menu('content/category', title='分类管理')
 @route("/api/category", allow=['admin'])
 class Category(RequestHandler):
 

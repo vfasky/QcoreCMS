@@ -1,8 +1,9 @@
 require ['jQuery', 'angular', 'admin/route'], ($, angular, app)->
+    #TODO 加入后台首页
     ctrls = []
     routes = []
 
-    $.getJSON '/api/admin.menu', (json)->
+    $.getJSON '/api/admin.route', (json)->
         if false == json.success
             alert json.msg
             return

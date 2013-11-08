@@ -4,7 +4,7 @@
     var ctrls, routes;
     ctrls = [];
     routes = [];
-    $.getJSON('/api/admin.menu', function(json) {
+    $.getJSON('/api/admin.route', function(json) {
       var v, _i, _len, _ref;
       if (false === json.success) {
         alert(json.msg);
