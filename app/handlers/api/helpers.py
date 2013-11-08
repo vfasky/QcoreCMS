@@ -124,8 +124,8 @@ if __name__ == '__main__':
             result = AdminMenu.add('test/admin')
 
             self.assert_equal(
-                result['test']['admin']['_ctrl'], 
-                'admin/ctrls/adminCtrl')
+                result['test']['admin']['_js'], 
+                'admin/ctrls/admin')
 
             result = AdminMenu.add('test/admin2', title='test', order=100)
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 result['test']['admin2']['_title'], 
                 'test')
         
-            result = AdminMenu.add('test', title='test0')
+            result = AdminMenu.add('test', title='test0', order=1000)
 
             self.assert_equal(
                 result['test']['_title'], 
@@ -141,8 +141,8 @@ if __name__ == '__main__':
 
 
         def test_list(self):
-            menu = AdminMenu.list()
-            
+            menu = AdminMenu.list()['menu']
+                       
             self.assert_equal(menu[0]['title'], 'test0')
             self.assert_equal(menu[0]['child'][0]['order'], 100)
 
