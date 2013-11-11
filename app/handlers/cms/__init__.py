@@ -26,7 +26,7 @@ class Index(RequestHandler):
             #yield gen.Task(self.application.cache.set, 'has_key2', 'test', -1)
         #else:
             #print 'read'
-        self.write('hello QcoreCMS')
+        self.write('hello word')
         self.finish()
 
 
