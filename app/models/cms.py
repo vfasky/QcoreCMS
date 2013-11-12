@@ -175,7 +175,7 @@ class Category(AsyncModel):
         '''返回多维树'''
         ar = cls.select(
             cls.id, cls.parent,
-            cls.title, cls.desc,
+            cls.title, cls.desc, cls.state,
             cls.table, Table.table
         ).join(Table).order_by(
             cls.order.desc()

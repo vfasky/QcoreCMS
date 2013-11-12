@@ -3,6 +3,7 @@ define ['admin/factory'], (app)->
     ($scope, $resource, $http)->
         actions =
             save: method: 'POST'
+            update: method: 'PUT'
             mulit: method: 'GET', isArray: true
 
         Catgory = $resource('/api/category', {}, actions)
@@ -36,6 +37,20 @@ define ['admin/factory'], (app)->
                 getFormField ->
                     $scope.isList = true
 
+            )
+
+        # 停用分类
+        $scope.stop = (val) ->
+             
+            data =
+                id: val.id
+                state: 0
+            
+            if val.state == 0
+                data.state = 1
+
+            Catgory.update(data, (ret)->
+                $scope.catgorys = Catgory.mulit()
             )
             
         # 编辑表单

@@ -86,9 +86,41 @@ class Category(RequestHandler):
     @asynchronous
     @gen.engine
     def get(self):
+        '''查看所有分类，包括停用的'''
         tree = yield gen.Task(cms.Category.td_tree, all_state=True)
 
         self.jsonify(data=tree)
+    
+    @asynchronous
+    @gen.engine
+    def put(self):
+        '''停用/启用 分类'''
+        id = self.get_argument('id', None)
+        state = self.get_argument('state', None)
+
+        if id == None or state not in ('0', '1'):
+            self.jsonify(
+                success=False,
+                msg='Argument exception'
+            )
+            return
+
+        # 检查分类是否存在
+        category_ar = cms.Category.select()\
+            .where(cms.Category.id == id)
+
+        if 0 == (yield gen.Task(category_ar.count)):
+            self.jsonify(
+                success=False,
+                msg='not Data')
+            return
+
+        category_model = yield gen.Task(category_ar.get)
+        category_model.state = int(state)
+        #print category_model.state 
+        yield gen.Task(category_model.save)
+
+        self.jsonify()
 
     @form('app.forms.cms.Category')
     @asynchronous

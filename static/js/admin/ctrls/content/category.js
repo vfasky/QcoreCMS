@@ -8,6 +8,9 @@
           save: {
             method: 'POST'
           },
+          update: {
+            method: 'PUT'
+          },
           mulit: {
             method: 'GET',
             isArray: true
@@ -42,6 +45,19 @@
             return getFormField(function() {
               return $scope.isList = true;
             });
+          });
+        };
+        $scope.stop = function(val) {
+          var data;
+          data = {
+            id: val.id,
+            state: 0
+          };
+          if (val.state === 0) {
+            data.state = 1;
+          }
+          return Catgory.update(data, function(ret) {
+            return $scope.catgorys = Catgory.mulit();
           });
         };
         $scope.edit = function(val) {

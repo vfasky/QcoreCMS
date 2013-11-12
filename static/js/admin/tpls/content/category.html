@@ -25,7 +25,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="v in catgorys">
+                <tr ng-repeat="v in catgorys" class="{{(v.state !== 1 ? 'danger' : '')}}">
                     <td>{{v.id}}</td>
                     <td> | {{v.icon}} &nbsp; {{v.title}}</td>
                     <td>{{v.desc}}</td>
@@ -34,6 +34,15 @@
                         <button ng-click="edit(v)" tool-tip="编辑" type="button" class="btn btn-default btn-sm">
                             <i class="icon-edit"></i>
                         </button>
+
+                        <button ng-if="v.start != 1" ng-click="stop(v)" tool-tip="停用" type="button" class="btn btn-default btn-sm">
+                            <i class="icon-pause"></i>
+                        </button>
+
+                        <button ng-if="v.start == 1" ng-click="start(v)" tool-tip="启用" type="button" class="btn btn-default btn-sm">
+                            <i class="icon-play"></i>
+                        </button>
+
                     </td>
                 </tr>
             </tbody>
