@@ -5,7 +5,7 @@
 # @Link: http://vfasky.com
 # @Version: $Id$
 
-from xcat.web import RequestHandler, route, form
+from xcat.web import RequestHandler, route, form, validator
 from tornado import gen
 from tornado.web import asynchronous 
 from app.models import cms
@@ -90,24 +90,24 @@ class Category(RequestHandler):
         tree = yield gen.Task(cms.Category.td_tree, all_state=True)
 
         self.jsonify(data=tree)
-    
+
+
+    @validator('id', 'number') # 验证参数 id 是否为数字
+    @validator('state', 'number', choices=(0,1))
     @asynchronous
     @gen.engine
     def put(self):
         '''停用/启用 分类'''
-        id = self.get_argument('id', None)
-        state = self.get_argument('state', None)
-
-        if id == None or state not in ('0', '1'):
+        if False == self._is_validated:
             self.jsonify(
                 success=False,
-                msg='Argument exception'
+                msg=self._validator_error['msg']
             )
             return
-
+        
         # 检查分类是否存在
         category_ar = cms.Category.select()\
-            .where(cms.Category.id == id)
+            .where(cms.Category.id == self.context['id'])
 
         if 0 == (yield gen.Task(category_ar.count)):
             self.jsonify(
@@ -116,8 +116,7 @@ class Category(RequestHandler):
             return
 
         category_model = yield gen.Task(category_ar.get)
-        category_model.state = int(state)
-        #print category_model.state 
+        category_model.state = self.context['state']
         yield gen.Task(category_model.save)
 
         self.jsonify()

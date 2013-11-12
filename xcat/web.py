@@ -34,6 +34,76 @@ from tornado.util import import_object
 from jinja2 import Environment, FileSystemLoader
 from .utils import Validators
 
+def validator(name, genre='string', required=True, choices=None):
+    '''验证请求参数'''
+
+    genre_type = ('string', 'number', 'float', 
+        'date', 'email', 'legal_accounts', 'ip_addr'
+    )
+
+    if genre not in genre_type:
+        raise NameError('genre Type Error!')
+        
+    def load(method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+
+            if hasattr(self, '_is_validated'):
+                # 如果已经验证失败， 直接返回
+                if False == self._is_validated:
+                    return method(self, *args, **kwargs)
+
+            self._is_validated = True
+
+            val = self.get_argument(name, None)
+            
+            # 验证必填
+            if required and (val == None or val == ''):
+                self._is_validated = False
+                self._validator_error = dict(
+                        name=name,
+                        error='required',
+                        msg='%s is required' % name
+                )
+                return method(self, *args, **kwargs)
+
+            if hasattr('Validators', 'is_%s' % genre):
+                if False == getattr('Validators', 'is_%s' % genre)(val):
+                    self._is_validated = False
+                    self._validator_error = dict(
+                            name=name,
+                            error='genre',
+                            msg='%s is not %s' % (name, genre)
+                    )
+                    return method(self, *args, **kwargs)
+                
+            if genre == 'number':
+                val = int(val)
+                print type(val)
+            elif genre == 'float':
+                val = float(val)
+
+            if choices != None and val not in choices:
+                self._is_validated = False
+                self._validator_error = dict(
+                        name=name,
+                        error='choices',
+                        msg='%s is abnormal' % name
+                )
+                return method(self, *args, **kwargs)
+
+            if False == hasattr(self, 'context'):
+                self.context = {}
+
+            self.context[name] = val
+            return method(self, *args, **kwargs)
+
+        return wrapper
+
+    return load
+
+
+
 
 def form(form_name):
     '''表单加载器'''
