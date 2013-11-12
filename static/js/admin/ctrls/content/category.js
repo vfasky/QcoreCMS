@@ -47,7 +47,7 @@
             });
           });
         };
-        $scope.stop = function(val) {
+        $scope.changeState = function(val) {
           var data;
           data = {
             id: val.id,

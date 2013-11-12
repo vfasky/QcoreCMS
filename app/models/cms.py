@@ -205,7 +205,12 @@ class Category(AsyncModel):
 
                 if v['parent'] == item['id']:
                     v['level'] = item['level'] + 1
+                    
+                    if all_state and item['state'] == 0:
+                        v['state'] = 0
+
                     v['child_tree'] = get_childs(v)
+
                     child_tree.append(v)
 
             return child_tree

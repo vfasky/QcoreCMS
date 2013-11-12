@@ -27,19 +27,24 @@
             <tbody>
                 <tr ng-repeat="v in catgorys" class="{{(v.state !== 1 ? 'danger' : '')}}">
                     <td>{{v.id}}</td>
-                    <td> | {{v.icon}} &nbsp; {{v.title}}</td>
-                    <td>{{v.desc}}</td>
-                    <td>{{v.table_name}}</td>
+                    <td ng-if="v.state"> | {{v.icon}} &nbsp; {{v.title}}</td>
+                    <td ng-if="!v.state"> | {{v.icon}} &nbsp; <del>{{v.title}}</del></td>
+
+                    <td ng-if="v.state">{{v.desc}}</td>
+                    <td ng-if="!v.state"><del>{{v.desc}}</del></td>
+
+                    <td ng-if="v.state">{{v.table_name}}</td>
+                    <td ng-if="!v.state"><del>{{v.table_name}}</del></td>
+
                     <td>
                         <button ng-click="edit(v)" tool-tip="编辑" type="button" class="btn btn-default btn-sm">
                             <i class="icon-edit"></i>
                         </button>
 
-                        <button ng-if="v.start != 1" ng-click="stop(v)" tool-tip="停用" type="button" class="btn btn-default btn-sm">
-                            <i class="icon-pause"></i>
+                        <button ng-if="v.state" tool-tip="停用" ng-click="changeState(v)" type="button" class="btn btn-default btn-sm">
+                            <i  class="icon-pause"></i>
                         </button>
-
-                        <button ng-if="v.start == 1" ng-click="start(v)" tool-tip="启用" type="button" class="btn btn-default btn-sm">
+                        <button ng-if="!v.state" tool-tip="启用" ng-click="changeState(v)" type="button" class="btn btn-default btn-sm">
                             <i class="icon-play"></i>
                         </button>
 

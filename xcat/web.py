@@ -79,7 +79,6 @@ def validator(name, genre='string', required=True, choices=None):
                 
             if genre == 'number':
                 val = int(val)
-                print type(val)
             elif genre == 'float':
                 val = float(val)
 

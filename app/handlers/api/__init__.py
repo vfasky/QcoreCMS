@@ -38,11 +38,19 @@ class RequestHandler(RequestHandler):
 class GetForm(RequestHandler):
 
     '''取表单的结构'''
+    @validator('form')
     @asynchronous
     @gen.engine
     def get(self):
-        form_name = self.get_argument('form')
-        if not form_name:
+        if False == self._is_validated:
+            self.jsonify(
+                success=False,
+                msg=self._validator_error['msg']
+            )
+            return
+
+        form_name = self.context['form']
+        if form_name.find('app.') != 0 or form_name.find('..') != -1:
             self.jsonify(success=False, msg='Not Form Name')
             return
 

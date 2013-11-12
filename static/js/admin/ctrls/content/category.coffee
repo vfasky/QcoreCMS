@@ -39,8 +39,8 @@ define ['admin/factory'], (app)->
 
             )
 
-        # 停用分类
-        $scope.stop = (val) ->
+        # 修改分类状态
+        $scope.changeState = (val) ->
              
             data =
                 id: val.id
