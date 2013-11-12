@@ -9,17 +9,31 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+import os
 from tornado.options import define, options, parse_command_line
+
+# 定义参数
+define('port', default=80, type=int)
+define('model', default='devel')
+define('psycopg2_impl', default='psycopg2')
+
+parse_command_line()
+
+psycopg2_impl = options.psycopg2_impl
+
+if psycopg2_impl == 'psycopg2cffi':
+    from psycopg2cffi import compat
+    compat.register()
+elif psycopg2_impl == 'psycopg2ct':
+    from psycopg2ct import compat
+    compat.register()
+
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from xcat import config
 from xcat.web import Application
 from config import settings
 
-# 定义参数
-define('port', default=80, type=int)
-define('model', default='devel')
-parse_command_line()
 
 # 设置运行模式
 settings['run_mode'] = options.model

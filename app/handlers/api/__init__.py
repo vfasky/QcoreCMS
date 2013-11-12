@@ -86,7 +86,7 @@ class Category(RequestHandler):
     @asynchronous
     @gen.engine
     def get(self):
-        tree = yield gen.Task(cms.Category.td_tree)
+        tree = yield gen.Task(cms.Category.td_tree, all_state=True)
 
         self.jsonify(data=tree)
 
