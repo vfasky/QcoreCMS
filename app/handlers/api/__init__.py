@@ -85,7 +85,107 @@ class Me(RequestHandler):
     def get(self):
         print self.current_user
         pass
-        
+
+@admin_menu('content/table', title='表管理')
+@route("/api/table", allow=['admin'])
+class Table(RequestHandler):
+    #TODO 表暂不支持删除
+
+    @asynchronous
+    @gen.engine
+    def get(self):
+        table = yield gen.Task(cms.Table.select().execute)
+
+        data = []
+        for v in table:
+            item = v._data
+            item['full_name'] = v.full_name
+            data.append(item)
+
+        self.jsonify(data=data)
+
+    @form('app.forms.cms.Table')
+    @asynchronous
+    @gen.engine
+    def post(self):
+        # 修改/ 添加表 注： 修改时，table 属性不能修改
+        # 添加时，要动态创建表
+        if not self.form.validate():
+            self.jsonify(
+                success=False,
+                msg=' \n '.join(self.format_form_error(self.form)))
+            return
+
+        post = self.form.data
+              
+        if post['id'] == '':
+            # 检查表是否已存在
+            table_count = yield gen.Task(
+                cms.Table.select().where(cms.Table.table == post['table']).count
+            )
+
+            if 0 != table_count:
+                self.jsonify(
+                    success=False,
+                    msg='Table already exists'
+                )
+                return
+
+            # 保存
+            table_ar = cms.Table()
+            table_ar.table = post['table']
+            table_ar.title = post['title']
+            yield gen.Task(table_ar.save)
+
+            # 创建实例表
+            Model = table_ar.get_model()
+            exists = yield gen.Task(Model.table_exists)
+            if not exists:
+                yield gen.Task(Model.create_table)
+
+            # 表默认字段
+            field_base_data = {
+                'ui': (yield gen.Task(
+                    cms.FieldUi.select().where(cms.FieldUi.name == 'textarea')
+                                        .where(cms.FieldUi.plugin == 'editor')
+                                        .get
+                )),
+                'field': 'TextField',
+                'name': 'content',
+                'label': '内容',
+            }
+
+            table_field = cms.TableField(**field_base_data)
+            table_field.table = table_ar
+            yield gen.Task(table_field.save)
+
+            #创建扩展表
+            ExtModel = yield gen.Task(table_ar.get_data_model)
+            exists = yield gen.Task(ExtModel.table_exists)
+            if not exists:
+                yield gen.Task(ExtModel.create_table)
+
+            self.jsonify()
+            return
+
+        else:
+
+            # 修改表，只能改表名
+            table_ar = cms.Table.select().where(cms.Table.id == post['id'])
+
+            if 0 == (yield gen.Task(table_ar.count)):
+                self.jsonify(
+                   success=False,
+                   msg='not Data',
+                )
+                return
+
+            table_ar = yield gen.Task(table_ar.get)
+            table_ar.title = post['title']
+            yield gen.Task(table_ar.save)
+
+            self.jsonify()
+
 
 @admin_menu('content/category', title='分类管理')
 @route("/api/category", allow=['admin'])
@@ -133,6 +233,7 @@ class Category(RequestHandler):
     @asynchronous
     @gen.engine
     def post(self):
+        #TODO 修改名称时，检查名称是否重复
         yield gen.Task(self.form.load_field_data)
 
         if not self.form.validate():

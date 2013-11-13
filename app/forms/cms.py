@@ -8,6 +8,25 @@ from tornado import gen
 from xcat.form import Form, validators, fields
 from app.models import cms
 
+class Table(Form):
+    '''表属性'''
+    id = fields.HiddenField()
+
+    title = fields.TextField(
+        '名称', [
+            validators.Required(),
+            validators.Length(min=2, max=100),
+        ]
+    )
+
+    table = fields.TextField(
+        '表名', [
+            validators.Required(),
+            validators.Length(min=2, max=50),
+        ]
+    )
+
+
 class Category(Form):
     '''分类表单'''
     id = fields.HiddenField()

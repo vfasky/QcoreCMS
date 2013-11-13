@@ -2,7 +2,7 @@
     <div class="panel-heading">
 
         <h3 class="panel-title row">
-            <div class="col-md-4">分类管理</div>
+            <div class="col-md-4">数据表管理</div>
             
             <div class="col-md-4 col-md-offset-4 text-right">
                 <button ng-click="add()" class="btn btn-default btn-sm">
@@ -19,33 +19,21 @@
                 <tr>
                     <th>#</th>
                     <th>名称</th>
-                    <th>描述</th>
                     <th>数据表</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="v in catgorys" class="{{(v.state !== 1 ? 'danger' : '')}}">
+                <tr ng-repeat="v in tables" >
                     <td>{{v.id}}</td>
-                    <td ng-if="v.state"> | {{v.icon}} &nbsp; {{v.title}}</td>
-                    <td ng-if="!v.state"> | {{v.icon}} &nbsp; <del>{{v.title}}</del></td>
 
-                    <td ng-if="v.state">{{v.desc}}</td>
-                    <td ng-if="!v.state"><del>{{v.desc}}</del></td>
+                    <td >{{v.title}}</td>
 
-                    <td ng-if="v.state">{{v.table_name}}</td>
-                    <td ng-if="!v.state"><del>{{v.table_name}}</del></td>
+                    <td >{{v.table}}</td>
 
                     <td>
                         <button ng-click="edit(v)" tool-tip="编辑" type="button" class="btn btn-default btn-sm">
                             <i class="icon-edit"></i>
-                        </button>
-
-                        <button ng-if="v.state" tool-tip="停用" ng-click="changeState(v)" type="button" class="btn btn-default btn-sm">
-                            <i  class="icon-pause"></i>
-                        </button>
-                        <button ng-if="!v.state" tool-tip="启用" ng-click="changeState(v)" type="button" class="btn btn-default btn-sm">
-                            <i class="icon-play"></i>
                         </button>
 
                     </td>
@@ -61,10 +49,11 @@
         <h3 class="panel-title">
             <button ng-click="isList = true" class="btn btn-default btn-sm">
                 <i class="icon-reply"></i>
-                分类管理
+                数据表管理
             </button>
 
         </h3>
     </div>
     <div class="panel-body" submit-act="submit()" wtforms="form"></div>
 </div>
+

@@ -7,6 +7,7 @@ __all__ = [
     'Category',
     'Content',
     'ContentData',
+    'table_prefix',
 ]
 from xcat import mopee
 from tornado import gen
@@ -25,6 +26,13 @@ class Table(AsyncModel):
 
     title = mopee.CharField(max_length=100)
     table = mopee.CharField(max_length=80, unique=True)
+    # 是否启用
+    state = mopee.IntegerField(default=1, index=True)
+
+    @property
+    def full_name(self):
+        return '%s%s' % (table_prefix, self.table)
+
 
     # 取索引模型
     def get_model(self):
@@ -192,7 +200,7 @@ class Category(AsyncModel):
 
         for v in data:
             item = v._data
-            item['table_name'] = '%s%s' % (table_prefix, v.table.table)
+            item['table_name'] = v.table.table #'%s%s' % (table_prefix, v.table.table)
 
             all_tree.append(item)
             if item['parent'] == 0:

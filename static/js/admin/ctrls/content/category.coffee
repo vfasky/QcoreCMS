@@ -1,4 +1,5 @@
 define ['admin/factory'], (app)->
+    # 分类管理
     app.controller('content_category' , ['$scope', '$resource', '$http',
     ($scope, $resource, $http)->
         actions =
@@ -26,7 +27,7 @@ define ['admin/factory'], (app)->
         getFormField()
 
         # 表单保存
-        $scope.submitAct = ->
+        $scope.submit = ->
             postData = {}
             angular.forEach($scope.form, (field)->
                 postData[field.name] = field.data
