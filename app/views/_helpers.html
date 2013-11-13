@@ -1,0 +1,91 @@
+{% macro render_form(form, action="", submit_title="save", method="post", legend=None, class="form-horizontal") %}
+    <form action="{{action}}" role="form" method="{{method}}" class="{{class}}">
+        {{ form.xsrf_form_html() }}
+        <fieldset {% if class %}class="{{class}}"{% endif %}>
+            {% if legend %}
+              <legend>{{legend}}</legend>
+            {% endif %}
+            {% for field in form %}
+                {% if field.type == 'HiddenField' %}
+                    {{ field() }}
+                {% else %}
+                    {{ form_field(field) }}
+                {% endif %}
+            {% endfor %}
+            {{ action_buttons(submit_title) }}
+        </fieldset>
+    </form>
+{% endmacro %}
+
+{%- macro form_field_label(field) -%}
+    <label class="col-lg-2 control-label">
+    {%- if field.flags.required -%}
+        <span class="abbr" title="此项必填">*</span>
+    {%- endif -%}
+    {{ field.label.text }}
+    </label>
+{% endmacro %}
+
+{%- macro form_field_description(field) -%}
+    {% if field.description %}
+        <span class="help-block">{{ field.description }}</span>
+    {% endif %}
+{%- endmacro -%}
+
+{%- macro form_field_errors(field) -%}
+    {% if field.errors %}
+    <div>
+        {%- for error in field.errors -%}
+        <span class="text-error">{{ error }}</span>
+        {%- endfor -%}
+    </div>
+    {% endif %}
+{%- endmacro -%}
+
+{%- macro form_field_boolean(field) -%}
+    <label>
+      {{ field(**kwargs) }}
+      <span>{{ field.label.text }}</span>
+    </label>
+    {{ form_field_description(field) }}
+    {{ form_field_errors(field) }}
+
+{%- endmacro -%}
+
+{%- macro action_buttons(submit_title, submit_class="btn btn-primary") -%}
+    <div class="form-group">
+        <div class="col-lg-offset-2 col-lg-10">
+            <button type="submit" class="{{submit_class}}">{{submit_title}}</button>
+        </div>
+    
+    </div>
+{%- endmacro -%}
+
+{%- macro form_field(field) -%}
+  <div class="form-group {% if field.errors %}has-error{% endif %}">
+    {% if field.type == 'HiddenField' %}
+        {{ field() }}
+        {{ form_field_errors(field) }}
+    {% else %}
+
+        {% if field.type == 'BooleanField' %}
+            {{ form_field_boolean(field, **kwargs) }}
+        {% else %}
+            {{ form_field_label(field) }}
+            <div class="col-lg-10">
+                {% if field.type == 'RadioField' %}
+                    {{ field(class='radio-group', **kwargs) }}
+                {% elif field.flags.required %}
+                    {{ field(class='form-control', required='', **kwargs) }}
+                {% else %}
+                    {{ field(class='form-control', **kwargs) }}
+                {% endif %}
+                {{ form_field_description(field) }}
+                {{ form_field_errors(field) }}
+            </div>
+
+        {% endif %}
+    {% endif %}
+  </div>
+{%- endmacro -%}
+

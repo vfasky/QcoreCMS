@@ -1,0 +1,27 @@
+{% extends "admin/_base.html" %}
+
+{% block body %}
+<div class="container">
+    <form action="" method="post" class="form-signin">
+        {{ form.xsrf_form_html() }}
+        <h2 class="form-signin-heading">{{handler.settings.site_name}}</h2>
+        <div {% if form.email.errors | length > 0 %} class="has-error" {% endif %}>
+            {{ form.email(placeholder="Enter your Email", class="form-control") }}
+
+            {%- for error in form.email.errors -%}
+            <span class="help-block">{{ error }}</span>
+            {%- endfor -%}
+
+        </div>
+
+        <div {% if form.password.errors | length > 0 %} class="has-error" {% endif %}>
+            {{ form.password(placeholder="Password", class="form-control") }}
+
+            {%- for error in form.password.errors -%}
+            <span class="help-block">{{ error }}</span>
+            {%- endfor -%}
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+</div>
+{% endblock %}

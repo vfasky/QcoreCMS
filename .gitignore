@@ -1,10 +1,10 @@
 .svn
 *.pyc
+*.swp
+.AppleDouble/
 .DS_Store
-.DS_Store
+config.py
 
-app/.DS_Store
+xcat.sublime-project
 
-*.pyc
-
-*.pyc
+xcat.sublime-workspace

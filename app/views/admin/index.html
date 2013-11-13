@@ -1,0 +1,61 @@
+{% extends "admin/_base.html" %}
+
+{%- macro menu(node) -%}
+{% if node['child'] | length >  0 %}
+    <li class="dropdown">
+    <a {%if node['is_ctrl'] %} href="#{{node['uri']}}" {% else %} href="" {% endif %} class="dropdown-toggle" data-toggle="dropdown">
+            {{node['title']}} <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+            {% for v in node['child'] %}
+            {{ menu(v) }}
+            {% endfor %}
+        </ul>
+    </li>
+{% elif node['is_ctrl'] and node['is_show'] %}
+    <li><a href="#{{node['uri']}}">{{node['title']}}</a></li>
+{% endif %}
+{%- endmacro -%}
+
+
+{% block body %}
+<div class="container">
+    <!-- Static navbar -->
+    <div class="navbar navbar-default">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" target="_blank" href="/">{{handler.settings.site_name}}</a>
+        </div>
+        <div class="navbar-collapse collapse" admin-menu>
+            <ul class="nav navbar-nav" >
+                {% for v in admin_menu %}
+                {{ menu(v) }}
+                {% endfor %} 
+                
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="active"><a href="#/system/me" avatar>
+                    <img class="img-circle" width="16" height="16" src="{{handler.current_user['gravatar']}}" alt="">
+                    {{handler.current_user['name']}}
+                </a></li>
+                <li><a href="../navbar-fixed-top/">
+                    <i class="icon-signout"></i>
+                    Logout
+                </a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+
+    <div ng-view></div>
+
+    <div class="end"></div>
+
+</div> <!-- /container -->
+{% endblock %}
+{% block foot %}
+    <script src="{{static_url('js/admin/main.js')}}"></script>
+{% endblock %}

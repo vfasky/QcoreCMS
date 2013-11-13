@@ -1,0 +1,9 @@
+{% extends "admin/_base.html" %}
+{% from "_helpers.html" import render_form %}
+
+{% block content %}
+<div class="well well-transparent">
+
+{{ render_form(form, legend=legend, submit_title=(submit_title or 'save') ) }}
+</div>
+{% endblock %}

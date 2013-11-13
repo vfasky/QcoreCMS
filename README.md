@@ -1,22 +1,36 @@
-Qcore CMS 
-========================
-基于 tornado 的高性能 , 高扩展性的 CMS
+Qcore CMS v2
+================
 
-### DEV 版安装方法 1 :
- 
- - 将 qcms.sql 导入数据库
- - 更改 app.py 的数据库连接
- - 在终端执行 `python app.py`
+**愿景： 高性能、 高定制性、 高扩展性**
 
-### DEV 版安装方法 2 :
+所有数据库查询, cache, session 均为异步
 
- - 在终端执行 `python setup.py install`
- - 修改 install.py 的配置
- - 在终端执行 `python install.py`
+**注： 目前只是开发版， 进度 5%**
 
-访问 http://127.0.0.1:8889/login
- 
-*DEV 版的后台账号是 : admin@admin.com 密码 : python*
- 
--- enjoy --
+## 依赖库 
+
+- tornado
+- peewee
+- Momoko
+- Jinja2
+- wtforms
+- arrow
+
+## 数据库
+
+- postgresql
+
+## 安装
+
+```bash
+pip install -r requirements.txt
+```
+
+## 运行
+
+修改 `config.def.py` 的配置，并改名 `config.py`
+
+```bash
+python xcms.py --port=8080
+```
 
