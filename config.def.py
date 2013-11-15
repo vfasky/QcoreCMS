@@ -18,7 +18,7 @@ settings = {
     'admin_email': 'admin@admin.com',  # 管理员邮箱
     'admin_passwd': 'XcatCMS2',  # 安装时的管理员密码
     'debug': True,
-    'xsrf_cookies': False,
+    'xsrf_cookies': True,
     'cookie_secret': 'QcoreCMS-Xcat-app',
     'app_path': app_path,
     'static_path': os.path.join(app_path, 'static'),

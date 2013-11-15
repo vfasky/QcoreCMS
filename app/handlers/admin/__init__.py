@@ -7,6 +7,8 @@
 __all__ = [
     'Index',
     'Login',
+    'JsRoutes',
+    'JsControllers',
 ]
 import time
 

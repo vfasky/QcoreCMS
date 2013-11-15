@@ -1,12 +1,20 @@
 define(['angular', 'admin/app', 'jQuery'], function(angular, app, $) {
     'use strict';
 
+    function getCookie(name) {
+      var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+      return r ? r[1] : undefined;
+    }
+
     return app.config(['$routeProvider', '$httpProvider', 'MsgProvider', 
       function($routeProvider, $httpProvider, MsgProvider) {
-
+        var csrfToken = getCookie("_xsrf");
+ 
         $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
         $httpProvider.defaults.transformRequest = function(data) {
-          return $.param(data != null ? data : {});
+          data = data || {};
+          data._xsrf = csrfToken;
+          return $.param(data);
         };
         $httpProvider.defaults.transformResponse = function(data, headersGetter) {
           var json;
@@ -15,6 +23,7 @@ define(['angular', 'admin/app', 'jQuery'], function(angular, app, $) {
             if (json.success) {
               return json.data;
             } else {
+              //console.log(MsgProvider.$get())
               MsgProvider.$get().error(json.msg);
               return null;
             }
