@@ -17,7 +17,7 @@ from tornado.web import asynchronous
 from app.models import User
 from ..api.helpers import admin_menu
 
-@route(r"/admin", allow=['admin'])
+@route("/admin", allow=['admin'])
 class Index(RequestHandler):
 
     '''Admin Cp'''
@@ -26,8 +26,24 @@ class Index(RequestHandler):
         #print self.current_user
         self.render('admin/index.html', admin_menu=admin_menu.list()['menu'])
 
+@route("/admin/js/routes.js")
+class JsRoutes(RequestHandler):
+    '''后台的js路由'''
 
-@route(r"/admin/login")
+    def get(self):
+        self.set_header("Content-Type", "application/javascript")
+        self.render('admin/routes.js', menu=admin_menu.list())
+
+@route("/admin/js/controllers.js")
+class JsControllers(RequestHandler):
+    '''后台的js路由'''
+
+    def get(self):
+        self.set_header("Content-Type", "application/javascript")
+        self.render('admin/controllers.js', menu=admin_menu.list())
+
+
+@route("/admin/login")
 class Login(RequestHandler):
 
     '''Admin Login'''

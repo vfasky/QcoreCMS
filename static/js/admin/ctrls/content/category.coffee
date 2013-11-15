@@ -1,7 +1,6 @@
-define ['admin/factory'], (app)->
+define [], ->
     # 分类管理
-    app.controller('content_category' , ['$scope', '$resource', '$http',
-    ($scope, $resource, $http)->
+    ['$scope', '$resource', '$http', ($scope, $resource, $http)->
         actions =
             save: method: 'POST'
             update: method: 'PUT'
@@ -100,5 +99,4 @@ define ['admin/factory'], (app)->
 
        
        
-    ])
-    return
+    ]

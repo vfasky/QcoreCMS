@@ -1,4 +1,4 @@
-define ['jQuery', 'admin/directive', 'bootstrap'], ($, app)->
+define ['jQuery', 'angular', 'bootstrap'], ($, angular)->
     
     class Modals
         _tpl = '
@@ -89,11 +89,9 @@ define ['jQuery', 'admin/directive', 'bootstrap'], ($, app)->
                 return
             )
             @el
-
     
-    # 注入弹窗
-    app.factory('Modals', ->
-        new Modals()
-    )
+    angular.module('admin.factory', [])
+           .factory('Modals', ->
+                new Modals()
+           )
 
-    app

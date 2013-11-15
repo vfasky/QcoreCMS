@@ -1,7 +1,6 @@
-define ['admin/factory'], (app)->
+define [], ->
     # 表管理 
-    app.controller('content_table' , ['$scope', '$resource', '$http',
-    ($scope, $resource, $http)->
+    ['$scope', '$resource', '$http', ($scope, $resource, $http)->
         actions =
             save: method: 'POST'
             update: method: 'PUT'
@@ -74,4 +73,4 @@ define ['admin/factory'], (app)->
                     field.data = val[field.name]
 
 
-    ])
+    ]
