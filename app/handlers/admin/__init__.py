@@ -14,6 +14,7 @@ from xcat.web import RequestHandler, route, form, session
 from xcat.utils import sha1
 from tornado import gen
 from tornado.web import asynchronous
+from tornado.ioloop import IOLoop
 from app.models import User
 from ..api.helpers import admin_menu
 
@@ -26,7 +27,7 @@ class Index(RequestHandler):
         #print self.current_user
         self.render('admin/index.html', admin_menu=admin_menu.list()['menu'])
 
-@route("/admin/js/routes.js")
+@route("/admin/js/routes.js", allow=['admin'])
 class JsRoutes(RequestHandler):
     '''后台的js路由'''
 
@@ -34,9 +35,9 @@ class JsRoutes(RequestHandler):
         self.set_header("Content-Type", "application/javascript")
         self.render('admin/routes.js', menu=admin_menu.list())
 
-@route("/admin/js/controllers.js")
+@route("/admin/js/controllers.js", allow=['admin'])
 class JsControllers(RequestHandler):
-    '''后台的js路由'''
+    '''后台的js控制器'''
 
     def get(self):
         self.set_header("Content-Type", "application/javascript")
@@ -54,7 +55,7 @@ class Login(RequestHandler):
 
     @form('app.forms.Login')
     @session
-    @gen.engine
+    @gen.coroutine
     @asynchronous
     def post(self):
         if not self.form.validate():
@@ -62,9 +63,10 @@ class Login(RequestHandler):
                         form=self.form
                         )
             return
-        # 防止穷举
-        time.sleep(1.5)
 
+        # 防止穷举
+        yield gen.Task(IOLoop.instance().add_timeout, time.time() + 1.5)
+        
         post = self.form.data
         user = User.select().where(User.email == post['email'])\
                             .where(User.password == sha1(post['password']))

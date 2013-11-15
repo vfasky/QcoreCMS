@@ -25,7 +25,7 @@ define ['jQuery', 'angular', 'bootstrap'], ($, angular)->
                         #{msg}
                     </div>"
 
-                    el.css 
+                    el.css
                         position: 'absolute'
                         width: '100%'
                         zIndex: 1500

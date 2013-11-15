@@ -71,13 +71,6 @@ class GetForm(RequestHandler):
 
         self.jsonify(form=form_obj.to_dict())
 
-@route("/api/admin.route", allow=['admin'])
-class AdminRoute(RequestHandler):
-    '''后台路由'''
-
-    def get(self):
-        self.jsonify(data=admin_menu.list())
-
 @admin_menu('system/me', is_show=False)
 @route("/api/me", allow=['admin'])
 class Me(RequestHandler):
