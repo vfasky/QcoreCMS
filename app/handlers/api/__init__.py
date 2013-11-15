@@ -42,14 +42,15 @@ class GetForm(RequestHandler):
     @asynchronous
     @gen.engine
     def get(self):
-        if False == self._is_validated:
+        '''停用/启用 分类'''
+        if False == self.validator.success:
             self.jsonify(
                 success=False,
-                msg=self._validator_error['msg']
+                msg=self.validator.error.msg,
             )
             return
 
-        form_name = self.context['form']
+        form_name = self.validator.data.form
         if form_name.find('app.') != 0 or form_name.find('..') != -1:
             self.jsonify(success=False, msg='Not Form Name')
             return
@@ -206,16 +207,18 @@ class Category(RequestHandler):
     @gen.engine
     def put(self):
         '''停用/启用 分类'''
-        if False == self._is_validated:
+        if False == self.validator.success:
             self.jsonify(
                 success=False,
-                msg=self._validator_error['msg']
+                msg=self.validator.error.msg,
             )
             return
+
+        put = self.validator.data
         
         # 检查分类是否存在
         category_ar = cms.Category.select()\
-            .where(cms.Category.id == self.context['id'])
+            .where(cms.Category.id == put.id)
 
         if 0 == (yield gen.Task(category_ar.count)):
             self.jsonify(
@@ -224,7 +227,7 @@ class Category(RequestHandler):
             return
 
         category_model = yield gen.Task(category_ar.get)
-        category_model.state = self.context['state']
+        category_model.state = put.state
         yield gen.Task(category_model.save)
 
         self.jsonify()

@@ -30,7 +30,7 @@ from tornado.web import url, RequestHandler, \
 from tornado.escape import linkify
 from tornado import gen
 from tornado.options import options, define
-from tornado.util import import_object
+from tornado.util import import_object, ObjectDict
 from jinja2 import Environment, FileSystemLoader
 from .utils import Validators
 
@@ -48,33 +48,39 @@ def validator(name, genre='string', required=True, choices=None):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
 
-            if hasattr(self, '_is_validated'):
+            if hasattr(self, 'validator'):
                 # 如果已经验证失败， 直接返回
-                if False == self._is_validated:
+                if False == self.validator.success:
                     return method(self, *args, **kwargs)
 
-            self._is_validated = True
+            else:
+                self.validator = ObjectDict()
+
+            self.validator.success = True
 
             val = self.get_argument(name, None)
             
             # 验证必填
             if required and (val == None or val == ''):
-                self._is_validated = False
-                self._validator_error = dict(
-                        name=name,
-                        error='required',
-                        msg='%s is required' % name
-                )
+                self.validator.success = False
+                self.validator.error = ObjectDict(dict(
+                    name=name,
+                    rule='required',
+                    msg='%s is required' % name
+                )) 
+                
                 return method(self, *args, **kwargs)
 
             if hasattr('Validators', 'is_%s' % genre):
                 if False == getattr('Validators', 'is_%s' % genre)(val):
-                    self._is_validated = False
-                    self._validator_error = dict(
-                            name=name,
-                            error='genre',
-                            msg='%s is not %s' % (name, genre)
-                    )
+                   
+                    self.validator.success = False
+                    self.validator.error = ObjectDict(dict(
+                        name=name,
+                        rule='genre',
+                        msg='%s is not %s' % (name, genre)
+                    )) 
+     
                     return method(self, *args, **kwargs)
                 
             if genre == 'number':
@@ -83,18 +89,20 @@ def validator(name, genre='string', required=True, choices=None):
                 val = float(val)
 
             if choices != None and val not in choices:
-                self._is_validated = False
-                self._validator_error = dict(
-                        name=name,
-                        error='choices',
-                        msg='%s is abnormal' % name
-                )
+                
+                self.validator.success = False
+                self.validator.error = ObjectDict(dict(
+                    name=name,
+                    rule='choices',
+                    msg='%s is abnormal' % name
+                )) 
+ 
                 return method(self, *args, **kwargs)
 
-            if False == hasattr(self, 'context'):
-                self.context = {}
+            if False == hasattr(self.validator, 'data'):
+                self.validator.data = ObjectDict()
 
-            self.context[name] = val
+            self.validator.data[name] = val
             return method(self, *args, **kwargs)
 
         return wrapper

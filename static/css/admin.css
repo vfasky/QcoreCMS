@@ -9,6 +9,7 @@ body{padding:30px;background:#e7e7e7}
 .form-signin input[type="password"]{margin-bottom:10px;border-top-left-radius:0;border-top-right-radius:0}
 .navbar-default{background:#363c46;border:none;color:#fff}.navbar-default .navbar-brand{color:#fff}
 .navbar-default .navbar-nav>li>a,.navbar-default .navbar-nav .open .dropdown-menu>li>a{color:#999}.navbar-default .navbar-nav>li>a:hover,.navbar-default .navbar-nav .open .dropdown-menu>li>a:hover{color:#efefef}
+.navbar-default .navbar-nav>li>a:hover,.navbar-default .navbar-nav .open .dropdown-menu>li>a:hover{color:#999}
 .navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:hover,.navbar-default .navbar-nav>.active>a:focus{background-color:#08c;color:#fff}
 .navbar-default .navbar-nav>.dropdown>a:hover .caret,.navbar-default .navbar-nav>.dropdown>a .caret{border-bottom-color:#fff;border-top-color:#fff}
 .navbar-default .navbar-nav>.open>a .caret,.navbar-default .navbar-nav>.open>a:hover .caret,.navbar-default .navbar-nav>.open>a:focus .caret{border-bottom-color:#fff;border-top-color:#fff}
