@@ -18,8 +18,8 @@ Qcore CMS v2
 
 ## 前端
 
-- [AngularJS 1.5.1]([http://angularjs.org/)
-- [Twitter Bootstrap 3.0.](http://getbootstrap.com/2)
+- [AngularJS v 1.5.1]([http://angularjs.org/)
+- [Twitter Bootstrap v 3.0.2](http://getbootstrap.com/)
 
 ## 数据库
 
