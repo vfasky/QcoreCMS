@@ -3,10 +3,10 @@ define ['angular', 'admin/services', 'jQuery', 'bootstrap'], (angular, services,
 
     angular.module('admin.directives', ['admin.services'])
            .directive('appVersion', ['version', (version) ->
-                (scope, element, attrs) ->
+                (scope, element, attr) ->
                     element.text(version)
             ])
-           .directive('toolTip', [ ->
+            .directive('toolTip', [ ->
                 (scope, element, attr) ->
                     tip       = attr.toolTip
                     placement = attr.placement ? 'top'

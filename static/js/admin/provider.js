@@ -43,9 +43,10 @@
       Msg.error = function(msg) {
         return Msg.pushMsg(msg, 'danger');
       };
-      return this.$get = function() {
+      this.$get = function() {
         return Msg;
       };
+      return Msg;
     });
   });
 

@@ -1,0 +1,49 @@
+<div class="panel panel-default" ng-show="isList">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <i class="icon-cogs"></i> {{fields.table}}
+            &nbsp;
+            <a href="#/content/table" class="btn btn-default btn-sm">
+                <i class="icon-reply"></i>
+                数据表管理
+            </a>
+
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>label</th>
+                    <th>name</th>
+                    <th>field</th>
+                    <th>ui</th>
+                    <th>index</th>
+                    <th>unique</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="v in fields.data" >
+                    <td>{{v.id}}</td>
+                    <td>
+                        <input ng-blur="change(v)" type="text" ng-model="v.label" class="form-control" style="max-width:90px;">    
+                    </td>
+                    <td>{{v.name}}</td>
+                    <td>{{v.field}}</td>
+                    <td>{{v.fieldUI.desc}}</td>
+                    <td>{{v.index ? 'yes' : 'no'}}</td>
+                    <td>{{v.unique ? 'yes' : 'no'}}</td>
+                    <td>
+                        <button ng-click="delete(v)" tool-tip="删除" type="button" class="btn btn-default btn-sm">
+                            <i class="icon-trash"></i>
+                        </button>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+

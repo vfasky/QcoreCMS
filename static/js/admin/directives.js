@@ -2,9 +2,9 @@
 (function() {
   define(['angular', 'admin/services', 'jQuery', 'bootstrap'], function(angular, services, $) {
     'use strict';
-    return angular.module('admin.directives', ['admin.services']).directive('appVersion', [
+    angular.module('admin.directives', ['admin.services']).directive('appVersion', [
       'version', function(version) {
-        return function(scope, element, attrs) {
+        return function(scope, element, attr) {
           return element.text(version);
         };
       }
@@ -38,7 +38,5 @@
       }
     ]);
   });
-
-  return;
 
 }).call(this);

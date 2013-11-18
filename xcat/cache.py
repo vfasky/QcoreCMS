@@ -76,7 +76,8 @@ class Memcache(object):
 
     @gen.engine
     def get(self, key, default=None, callback=None):
-        ret = yield gen.Task(self._conn.get, key)
+        #print self._conn
+        ret = yield gen.Task(self._conn.get, str(key))
         if ret is None:
             callback(default)
         else:
@@ -89,7 +90,7 @@ class Memcache(object):
             is_persistence = True
             left_time = 0
 
-        ret = yield gen.Task(self._conn.set, key, val, left_time)
+        ret = yield gen.Task(self._conn.set, str(key), val, left_time)
         if callback:
             callback(ret)
         
@@ -109,7 +110,7 @@ class Memcache(object):
 
     @gen.engine
     def remove(self, key, callback=None):
-        ret = yield gen.Task(self._conn.delete, key)
+        ret = yield gen.Task(self._conn.delete, str(key))
         if callback:
             callback(ret)
 

@@ -9,17 +9,30 @@ __all__ = [
     'ContentData',
     'table_prefix',
 ]
-from xcat import mopee
+import uuid
+import xcat
+from xcat import mopee, config
 from tornado import gen
 from app.models import AsyncModel, User
 
 # 表前缀
 table_prefix = 'cms_'
 
+# 加载缓存 
+cache = False
+cache_cfg = config.get('cache', False)
+cache_storage = cache_cfg.get('storage', 'Mongod')
+if cache_cfg and hasattr(xcat.cache, cache_storage):
+    Cache = getattr(xcat.cache, cache_storage)
+    #print cache_cfg.get('config')
+    cache = Cache(**cache_cfg.get('config', {}))
+
 
 class Table(AsyncModel):
-
     """内容表列表"""
+
+    # 模型定义缓存
+    _model_caches = {}
 
     class Meta:
         db_table = '%s%s' % (table_prefix, 'table')
@@ -29,19 +42,90 @@ class Table(AsyncModel):
     # 是否启用
     state = mopee.IntegerField(default=1, index=True)
 
+    @classmethod 
+    @gen.engine
+    def sync(cls, table, callback, key=False):
+        cls._model_caches.setdefault(table, {
+            'key': 0,
+            'model': False
+        })
+
+        if False == key:
+            cls._model_caches[table]['model'] = False
+            key = str(uuid.uuid4())
+        
+
+
+        if cache:
+            # 通知 Table 更新 model 缓存
+            cache_key = 'QcoreCMSModelCache%s' % table
+            yield gen.Task(cache.set, cache_key, key)
+
+        callback()
+
+    @classmethod 
+    @gen.engine
+    def set_model_cache(cls, table, model, callback):
+        def_val = {
+            'key': 0,
+            'model': False
+        }
+        cls._model_caches.setdefault(table, def_val)
+
+        cache_data = cls._model_caches[table]
+
+        cache_data['model'] = model
+        cache_data['key'] = str(uuid.uuid4())
+
+        yield gen.Task(cls.sync, table=table, key=cache_data['key'])
+
+        callback()
+
+
+    @classmethod 
+    @gen.engine
+    def get_model_cache(cls, table, callback):
+        def_val = {
+            'key': 0,
+            'model': False
+        }
+        cls._model_caches.setdefault(table, def_val)
+
+        cache_data = cls._model_caches[table]
+
+        # 取同步信号
+        if cache:
+            cache_key = 'QcoreCMSModelCache%s' % table
+            sync_key = yield gen.Task(cache.get, cache_key, 0)
+
+            if sync_key == cache_data['key'] :
+                callback(cache_data['model'])
+            else:
+                callback(False)
+        else:
+            callback(cache_data['model'])
+
+
     @property
     def full_name(self):
         return '%s%s' % (table_prefix, self.table)
 
 
     # 取索引模型
-    def get_model(self):
+    def get_model(self, callback):
         Clone = content_clone(self.table)
         return Clone
 
     # 取内容模型
     @gen.engine
     def get_data_model(self, callback):
+        #print self.get_model_cache
+        Model = yield gen.Task(self.get_model_cache, table=self.table)
+        
+        if Model:
+            callback(Model)
+            return
+
         Clone = ContentData.clone(self.table)
 
         ar = TableField.select().where(TableField.table == self)\
@@ -59,6 +143,10 @@ class Table(AsyncModel):
                 )
                 Clone.set_attr(v.name, field)
 
+        Clone._fields_ar = fields
+
+        yield gen.Task(self.set_model_cache, self.table, Clone)
+        
         callback(Clone)
 
 
@@ -272,10 +360,13 @@ class ContentData(AsyncModel):
     def remove_field(cls, key, callback):
         sql = 'ALTER TABLE %s DROP COLUMN %s;' % (cls._meta.db_table, key)
         yield gen.Task(cls._meta.database.execute_sql, sql)
+        
+        yield gen.Task(Table.sync, cls._table)
+        
         callback({
             'success': True
         })
-
+        
     @classmethod
     @gen.engine
     def add_field(cls, key, field_str, callback, **kwargs):
@@ -286,9 +377,13 @@ class ContentData(AsyncModel):
             sql = 'ALTER TABLE %s ADD COLUMN %s;' % (
                 cls._meta.db_table, compiler.field_sql(field))
             yield gen.Task(cls._meta.database.execute_sql, sql)
+            
+            yield gen.Task(Table.sync, cls._table)
+
             callback({
                 'success': True
             })
+
             return
 
         callback({
@@ -299,6 +394,7 @@ class ContentData(AsyncModel):
     @staticmethod
     def clone(table):
         class Copy(ContentData):
+            _table = table
 
             class Meta:
                 db_table = '%s%s_data' % (table_prefix, table)

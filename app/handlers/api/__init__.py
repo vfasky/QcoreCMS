@@ -79,6 +79,83 @@ class Me(RequestHandler):
     def get(self):
         print self.current_user
         pass
+    
+@admin_menu('content/tablefield', uri='/content/tablefield/:id', is_show=False)
+@route("/api/tablefield", allow=['admin'])
+class TableField(RequestHandler):
+    # 表字段管理
+    
+    @asynchronous
+    @gen.engine
+    @validator('id', 'number')
+    def get(self):
+        if False == self.validator.success:
+            self.jsonify(
+                success=False,
+                msg=self.validator.error.msg 
+            )
+            return
+
+        id = self.validator.data.id
+
+        table = cms.Table.select().where(cms.Table.id == id)
+
+        if 0 == (yield gen.Task(table.count)):
+            self.jsonify(
+                success=False,
+                msg='No Data'
+            )
+            return
+
+        table_ar = yield gen.Task(table.get)
+        ContentModel = yield gen.Task(table_ar.get_data_model)
+
+        data = []
+        for v in ContentModel._fields_ar:
+            field = v._data
+            if not field.get('fieldUI'):
+                field['fieldUI'] = (yield gen.Task(
+                        cms.FieldUi.select().where(cms.FieldUi.id == field['ui']).get
+                ))._data
+            data.append(field)
+
+        self.jsonify(data=dict(
+            table=table_ar.table,
+            data=data,
+        ))
+
+    @asynchronous
+    @gen.engine
+    @validator('id', 'number')
+    @validator('label')
+    def put(self):
+        if False == self.validator.success:
+            self.jsonify(
+                success=False,
+                msg=self.validator.error.msg 
+            )
+            return
+
+        put = self.validator.data
+
+        field_ar = cms.TableField.select(cms.TableField, cms.Table.table).where(
+                cms.TableField.id == put.id
+        ).join(cms.Table)
+
+        if 0 == (yield gen.Task(field_ar.count)):
+            self.jsonify(
+                success=False,
+                msg='No Data'
+            )
+            return
+
+        field_ar = yield gen.Task(field_ar.get)
+
+        field_ar.label = put.label
+        yield gen.Task(field_ar.save)
+        yield gen.Task(cms.Table.sync, field_ar.table.table)
+
+        self.jsonify()
 
 @admin_menu('content/table', title='表管理')
 @route("/api/table", allow=['admin'])

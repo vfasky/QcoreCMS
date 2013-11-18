@@ -49,5 +49,7 @@ define ['jQuery', 'angular', 'bootstrap'], ($, angular)->
 
                 this.$get = -> Msg
 
+                return Msg
+
            )
 
