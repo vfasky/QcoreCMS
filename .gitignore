@@ -8,3 +8,5 @@ config.py
 xcat.sublime-project
 
 xcat.sublime-workspace
+
+dev.log
