@@ -5,7 +5,7 @@ Qcore CMS v2
 
 所有数据库查询, cache, session 均为异步
 
-**注： 目前只是开发版， 进度 5%**
+**注： 目前只是开发版， 进度 7%**
 
 ## 依赖库 
 
@@ -15,6 +15,11 @@ Qcore CMS v2
 - Jinja2
 - wtforms
 - arrow
+
+## 前端
+
+- [http://angularjs.org/](AngularJS 1.5.1)
+- [http://getbootstrap.com/](Twitter Bootstrap 3.0.2)
 
 ## 数据库
 
