@@ -26,6 +26,51 @@ class Table(Form):
         ]
     )
 
+class TableField(Form):
+    '''表字段属性'''
+    id = fields.HiddenField()
+    
+    table_id = fields.HiddenField(
+        'table_id', [
+            validators.Required()
+        ]
+    )
+
+    field_choices = []
+    for v in cms.TableField.fields:
+        field_choices.append((v, v))
+
+    field = fields.SelectField(
+        'field',
+        choices=field_choices,
+    )
+
+    name = fields.TextField(
+        'name', [
+            validators.Required(),
+            validators.Length(min=3, max=100),
+        ]
+    )
+
+    label = fields.TextField(
+        'label', [
+            validators.Required(),
+            validators.Length(min=3, max=20),
+            validators.Regexp(r'[A-Za-z]', message='只容许字母')
+        ]
+    )
+
+    list_data = fields.TextAreaField(
+         '可选数据',
+         description = 'label=val 这样的形式，一行一个'
+    )
+
+    filters = fields.SelectField(
+        '数据过滤',
+        choices=[
+
+        ]
+    )
 
 class Category(Form):
     '''分类表单'''
@@ -51,7 +96,7 @@ class Category(Form):
     )
 
     table = fields.SelectField(
-        '数据模型',
+        '数据表',
         choices=[],
     )
 

@@ -1,13 +1,21 @@
 <div class="panel panel-default" ng-show="isList">
     <div class="panel-heading">
-        <h3 class="panel-title">
-            <i class="icon-cogs"></i> {{fields.table}}
-            &nbsp;
-            <a href="#/content/table" class="btn btn-default btn-sm">
-                <i class="icon-reply"></i>
-                数据表管理
-            </a>
-
+        <h3 class="panel-title row">
+            <div class="col-md-4">
+                <i class="icon-cogs"></i> {{fields.table}}
+                &nbsp;
+                <a href="#/content/table" class="btn btn-default btn-sm">
+                    <i class="icon-reply"></i>
+                    数据表管理
+                </a>
+            </div>
+            
+            <div class="col-md-4 col-md-offset-4 text-right">
+                <button ng-click="add()" class="btn btn-default btn-sm">
+                    <i class="icon-plus"></i>
+                    新增
+                </button>
+            </div>
         </h3>
     </div>
     <div class="panel-body">
