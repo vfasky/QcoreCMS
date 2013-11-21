@@ -112,7 +112,7 @@ class Table(AsyncModel):
 
 
     # 取索引模型
-    def get_model(self, callback):
+    def get_model(self):
         Clone = content_clone(self.table)
         return Clone
 

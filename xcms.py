@@ -13,7 +13,7 @@ import os
 from tornado.options import define, options, parse_command_line
 
 # 定义参数
-define('port', default=80, type=int)
+define('port', default=8888, type=int)
 define('model', default='devel')
 define('psycopg2_impl', default='psycopg2')
 
