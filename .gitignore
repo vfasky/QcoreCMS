@@ -1,4 +1,5 @@
 .svn
+.env
 *.pyc
 *.swp
 .AppleDouble/
