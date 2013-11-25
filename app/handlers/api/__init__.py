@@ -59,11 +59,14 @@ class GetForm(RequestHandler):
         if hasattr(self, 'locale') and hasattr(self.locale, 'code'):
             locale_code = self.locale.code
 
-        try:
-            form_obj = import_object(form_name)(locale_code=locale_code)
-        except Exception, e:
-            self.jsonify(success=False, msg=str(e))
-            return
+
+        form_obj = import_object(form_name)(locale_code=locale_code)
+
+        #try:
+            #form_obj = import_object(form_name)(locale_code=locale_code)
+        #except Exception, e:
+            #self.jsonify(success=False, msg=str(e))
+            #return
         
         form_obj.xsrf_form_html = self.xsrf_form_html
         yield gen.Task(form_obj.load_field_data)

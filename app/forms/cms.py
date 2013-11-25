@@ -45,6 +45,11 @@ class TableField(Form):
         choices=field_choices,
     )
 
+    ui = fields.SelectField(
+        '表单ui',
+        choices=[],
+    )
+
     name = fields.TextField(
         'name', [
             validators.Required(),
@@ -65,12 +70,81 @@ class TableField(Form):
          description = 'label=val 这样的形式，一行一个'
     )
 
-    filters = fields.SelectField(
+    filter_rule = fields.TextAreaField(
         '数据过滤',
-        choices=[
-
-        ]
+        description = '一行一个, 默认支持: md5, trim, int, str'
     )
+
+    validator_rule = fields.TextAreaField(
+        '数据验证',
+        description = '''一行一个, 默认支持: Email(), IPAddress(), 
+          Length(1,10), NumberRange(1,10), Required(), 
+          Regexp('[A-Za-z]'), URL(), AnyOf(), NoneOf()
+        '''
+    )
+
+    tip = fields.TextField(
+        '表单提示'    
+    )
+
+    null = fields.SelectField(
+        '容许为空',
+        choices=[
+            ('1', '是'),
+            ('0', '否'),
+        ],
+        default='1'
+    )
+
+    index = fields.SelectField(
+        '创建索引',
+        choices=[
+            ('1', '是'),
+            ('0', '否'),
+        ],
+        default='0'
+    )
+
+    unique = fields.SelectField(
+        '唯一数据',
+        choices=[
+            ('1', '是'),
+            ('0', '否'),
+        ],
+        default='0'
+    )
+
+    default = fields.TextField(
+        '默认值'    
+    )
+
+    max_length = fields.TextField(
+        '最大长度', [
+            validators.NumberRange(1, 255)
+        ],
+        filters=[int],
+        default=0
+    )
+    
+    order = fields.TextField(
+        '排序', [
+            validators.NumberRange(0, 9999)
+        ],
+        filters=[int],
+        default=0
+    )
+
+    @gen.engine
+    def load_field_data(self, callback=None):
+        ui_data = []
+        for v in (yield gen.Task(cms.FieldUi.select().execute)):
+            ui_data.append((v.id, v.desc))
+
+        self.ui.choices = ui_data
+        #self.ui.default = ui_data[0][0]
+
+        callback and callback()
+
 
 class Category(Form):
     '''分类表单'''
