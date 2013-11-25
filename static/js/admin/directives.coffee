@@ -30,16 +30,33 @@ define ['angular', 'admin/services', 'jQuery', 'bootstrap'], (angular, services,
                                     <div ng-if=\"field.type == 'HiddenField'\">
                                         <input type=\"hidden\" name=\"{{field.name}}\" ng-model=\"field.data\">
                                     </div>
+
                                     <div class=\"form-group\" ng-if=\"field.type == 'TextField'\">
                                         <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
                                         <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
                                             <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required>
                                             <input id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\">
+                                            <p class=\"help-block\">{{ field.description }}</p>
                                         </div>
                                         <div class=\"col-sm-10\" ng-if=\"field.disabled\">
                                             <input id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
+                                            <p class=\"help-block\">{{ field.description }}</p>
                                         </div>
                                     </div>
+
+                                    <div class=\"form-group\" ng-if=\"field.type == 'TextAreaField'\">
+                                        <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
+                                        <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
+                                            <textarea rows=\"3\" id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" required></textarea>
+                                            <textarea rows=\"3\" id=\"wt-#{modelName}-{{ field.name }}\" ng-if=\"!field.required\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\"></textarea>
+                                            <p class=\"help-block\">{{ field.description }}</p>
+                                        </div>
+                                        <div class=\"col-sm-10\" ng-if=\"field.disabled\">
+                                            <textarea rows=\"3\" id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" type=\"text\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled></textarea>
+                                            <p class=\"help-block\">{{ field.description }}</p>
+                                        </div>
+                                    </div>
+
                                     <div class=\"form-group\" ng-if=\"field.type == 'SelectField'\">
                                         <label for=\"wt-#{modelName}-{{ field.name }}\" class=\"col-sm-2 control-label\">{{ field.label }}:</label>
                                         <div class=\"col-sm-10\" ng-if=\"!field.disabled\">
@@ -48,6 +65,8 @@ define ['angular', 'admin/services', 'jQuery', 'bootstrap'], (angular, services,
                                                     {{v.label}}
                                                 </option>
                                             </select>
+                                            <p class=\"help-block\">{{ field.description }}</p>
+
                                         </div>
                                         <div class=\"col-sm-10\" ng-if=\"field.disabled\">
                                             <select id=\"wt-#{modelName}-{{ field.name }}\" class=\"form-control\" name=\"{{field.name}}\" ng-model=\"field.data\" disabled>
@@ -55,6 +74,8 @@ define ['angular', 'admin/services', 'jQuery', 'bootstrap'], (angular, services,
                                                     {{v.label}}
                                                 </option>
                                             </select>
+                                            <p class=\"help-block\">{{ field.description }}</p>
+
                                         </div>
                                     </div>
                                     

@@ -67,7 +67,7 @@ class TableField(Form):
 
     list_data = fields.TextAreaField(
          '可选数据',
-         description = 'label=val 这样的形式，一行一个'
+         description = '一行一个, "label=val" 这样的形式'
     )
 
     filter_rule = fields.TextAreaField(

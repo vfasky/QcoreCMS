@@ -71,6 +71,7 @@ class Form(wtForm):
                 choices = choices,
                 required = field.flags.required,
                 disabled = False,
+                description = field.description,
             )
 
             if len(choices) > 0 and str(field.data).strip() == 'None':
