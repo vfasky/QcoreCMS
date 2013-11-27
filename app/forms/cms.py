@@ -48,6 +48,7 @@ class TableField(Form):
     ui = fields.SelectField(
         '表单ui',
         choices=[],
+        filters=[int],
     )
 
     name = fields.TextField(
@@ -120,7 +121,7 @@ class TableField(Form):
 
     max_length = fields.TextField(
         '最大长度', [
-            validators.NumberRange(1, 255)
+            validators.NumberRange(0, 255)
         ],
         filters=[int],
         default=0
@@ -138,7 +139,7 @@ class TableField(Form):
     def load_field_data(self, callback=None):
         ui_data = []
         for v in (yield gen.Task(cms.FieldUi.select().execute)):
-            ui_data.append((v.id, v.desc))
+            ui_data.append((int(v.id), v.desc))
 
         self.ui.choices = ui_data
         #self.ui.default = ui_data[0][0]

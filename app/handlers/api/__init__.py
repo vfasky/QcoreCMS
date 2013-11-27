@@ -87,6 +87,28 @@ class Me(RequestHandler):
 @route("/api/tablefield", allow=['admin'])
 class TableField(RequestHandler):
     # 表字段管理
+
+    @form('app.forms.cms.TableField')
+    @asynchronous
+    @gen.engine
+    def post(self):
+        yield gen.Task(self.form.load_field_data)
+
+        if not self.form.validate():
+            self.jsonify(
+                success=False,
+                msg=' \n '.join(self.format_form_error(self.form)))
+            return
+
+        post = self.form.data
+
+        post['filters'] = ', '.join(cms.TableField.decode_filters(post['filter_rule']))
+        rule_arr = cms.TableField.decode_validator(post['validator_rule'])
+        post['validators'] = cms.TableField.validators2str(rule_arr)
+
+        self.jsonify()
+
+
     
     @asynchronous
     @gen.engine
@@ -132,6 +154,7 @@ class TableField(RequestHandler):
     @validator('id', 'number')
     @validator('label')
     def put(self):
+        # 修改字段
         if False == self.validator.success:
             self.jsonify(
                 success=False,

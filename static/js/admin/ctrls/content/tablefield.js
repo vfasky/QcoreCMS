@@ -3,19 +3,22 @@
   define([], function() {
     return [
       '$scope', '$resource', '$http', '$routeParams', '$window', 'Msg', function($scope, $resource, $http, $routeParams, $window, Msg) {
-        var Fields, actions, getFormField, id, _form_field;
-        id = $routeParams.id;
-        if (!id) {
+        var Fields, actions, getFormField, table_id, _form_field;
+        table_id = $routeParams.id;
+        if (!table_id) {
           $window.location.href = '#/content/table';
         }
         actions = {
+          save: {
+            method: 'POST'
+          },
           update: {
             method: 'PUT'
           },
           mulit: {
             method: 'GET',
             params: {
-              id: id
+              id: table_id
             }
           }
         };
@@ -40,9 +43,28 @@
           });
         };
         getFormField();
+        $scope.submit = function() {
+          var postData;
+          postData = {};
+          angular.forEach($scope.form, function(field) {
+            return postData[field.name] = field.data;
+          });
+          postData.table_id = table_id;
+          console.log(postData);
+          $scope.isList = true;
+          return Fields.save(postData, function(ret) {
+            return $scope.fields = Fields.mulit();
+          });
+        };
         return $scope.add = function() {
           $scope.isList = false;
-          return $scope.form = angular.copy(_form_field);
+          $scope.form = angular.copy(_form_field);
+          return angular.forEach($scope.form, function(field) {
+            if (field.name === 'table_id') {
+              field.data = table_id;
+              return false;
+            }
+          });
         };
       }
     ];

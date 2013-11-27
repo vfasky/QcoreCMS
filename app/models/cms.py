@@ -11,6 +11,7 @@ __all__ = [
 ]
 import uuid
 import xcat
+from xcat import utils
 from xcat import mopee, config
 from tornado import gen
 from app.models import AsyncModel, User
@@ -189,9 +190,9 @@ class TableField(AsyncModel):
     field = mopee.CharField(choices=fields, max_length=100)
     name = mopee.CharField(max_length=100, help_text="字段名")
     label = mopee.CharField(max_length=100, help_text="表单名")
-    list_data = mopee.TextField(default='[]', help_text="列表数据")
-    filters = mopee.CharField(default='[]', help_text="编辑数据时，对数据进行过滤的函数")
-    validators = mopee.CharField(default='[]', help_text="编辑数据时，对数据进行验证的函数")
+    list_data = mopee.TextField(default='', help_text="列表数据")
+    filters = mopee.CharField(default='', help_text="编辑数据时，对数据进行过滤的函数")
+    validators = mopee.CharField(default='', help_text="编辑数据时，对数据进行验证的函数")
     tip = mopee.CharField(max_length=255, default='', help_text="编辑时的提示信息")
     null = mopee.IntegerField(max_length=2, default=1, help_text="1: 容许空 0: 否")
     index = mopee.IntegerField(max_length=2, default=0)
@@ -199,6 +200,119 @@ class TableField(AsyncModel):
     default = mopee.CharField(max_length=255, default=None, null=True)
     max_length = mopee.IntegerField(max_length=2, default=None, null=True)
     order = mopee.IntegerField(default=0, index=1)
+    
+    # 支持的过滤
+    filter_func = ['int', 'str', 'float', 'trim', 'md5', 'sha1']
+    # 支持的验证规则
+    validator_rules = ['Email', 'IPAddress', 'Length', 
+        'NumberRange', 'Required', 'Regexp', 'URL',
+        'AnyOf', 'NoneOf']
+
+    @classmethod
+    def validators2str(cls, validator_arr):
+        '''将验证规则转换成合法string'''
+        rules = []
+        for rule in validator_arr:
+            args = []
+            for r in rule['args']:
+                if utils.Validators.is_number(r):
+                    args.append(str(r))
+                else:
+                    args.append("'%s'" % r)
+
+            arg_str = ', '.join(args)
+            rule_name = '%s(%s)' % (rule['name'],  arg_str)
+
+            rules.append(rule_name)
+
+        return '\n'.join(rules)
+
+    @classmethod
+    def decode_validator(cls, validator_str):
+        '''解码验证规则成数组'''
+        if '' == validator_str.strip():
+            return []
+
+        clss = []
+
+        lower_rules = []
+        for rule in cls.validator_rules:
+            lower_rules.append(rule.lower())
+
+        for cls_str in validator_str.split('\n'):
+            if -1 != cls_str.find('(') and -1 != cls_str.find(')'):
+                tmp = cls_str.split('(')
+                cls_name = tmp[0].strip()
+                args = []
+                if 2 == len(tmp):
+                    args = tmp[1].strip(')').split(',')
+                elif 2 < len(tmp):
+                    arg_arr = []
+                    for i in range(1, len(tmp)):
+                        arg_arr.append(tmp[i])
+                    arg_str = '('.join(arg_arr)
+                    args = arg_str.strip(')').split(',')
+
+                args2 = []
+                for v in args:
+                    v = v.strip()
+                    if 0 == v.find("'"):
+                        args2.append(v.strip("'"))
+                    elif 0 == v.find('"'):
+                        args2.append(v.strip('"'))
+                    elif utils.Validators.is_number(v):
+                        args2.append(int(v))
+             
+                if cls_name.lower() in lower_rules:
+                    ix = lower_rules.index(cls_name.lower())
+                    clss.append(dict(
+                        name=cls.validator_rules[ix],
+                        args=args2
+                    ))
+
+        return clss
+
+
+    @classmethod
+    def decode_filters(cls, filter_str):
+        '''解码过滤规则成数组'''
+        if '' == filter_str.strip():
+            return []
+
+        funcs = []
+        for func_str in filter_str.split('\n'):
+            func_str = func_str.strip()
+            if func_str in cls.filter_func:
+                funcs.append(func_str)
+
+        return funcs
+
+    @classmethod
+    def filter2funcs(cls, filter_arr):
+        '''将过滤规则转成func'''
+        funcs = []
+        for func_str in filter_arr:
+            if 'int' == func_str:
+                funcs.append(int)
+            elif 'str' == func_str:
+                funcs.append(str)
+            elif 'float' == func_str:
+                funcs.append(float)
+            elif 'trim' == func_str:
+                def trim(val):
+                    return str(val).strip()
+                funcs.append(trim)
+            elif 'md5' == func_str:
+                def md5(val):
+                    return utils.md5(val) 
+                funcs.append(md5)
+            elif 'sha1' == func_str:
+                def sha1(val):
+                    return utils.sha1(val) 
+                funcs.append(sha1)
+
+        return funcs
+
 
 
 class Category(AsyncModel):

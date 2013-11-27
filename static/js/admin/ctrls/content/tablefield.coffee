@@ -2,14 +2,14 @@ define [], ->
     # 表字段管理 
     ['$scope', '$resource', '$http', '$routeParams', '$window', 'Msg',
      ($scope, $resource, $http, $routeParams, $window, Msg)->
-        id = $routeParams.id
-        if not id
+        table_id = $routeParams.id
+        if not table_id
             $window.location.href = '#/content/table'
 
         actions =
-            #save: method: 'POST'
+            save: method: 'POST'
             update: method: 'PUT'
-            mulit: method: 'GET', params: id: id
+            mulit: method: 'GET', params: id: table_id
 
         Fields = $resource("/api/tablefield", {}, actions)
         
@@ -33,12 +33,33 @@ define [], ->
                     callback()
 
         getFormField()
+        
+        # 保存数据
+        $scope.submit = ->
+            postData = {}
+            angular.forEach($scope.form, (field)->
+                postData[field.name] = field.data
+            )
+            postData.table_id = table_id
+
+            console.log postData
+
+            $scope.isList = true
+
+            Fields.save(postData, (ret)->
+                $scope.fields = Fields.mulit()
+            )
+
 
         # 添加表单
         $scope.add = ->
             $scope.isList = false
             $scope.form   = angular.copy _form_field
-
+            angular.forEach($scope.form, (field)->
+                if field.name == 'table_id'
+                    field.data = table_id
+                    return false
+            )
             
     ]
         
